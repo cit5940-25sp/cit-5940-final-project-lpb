@@ -49,14 +49,14 @@ public class GameController  {
         Player playerTwo;
         // Player 1
         if (arg1.equals("human")) {
-            playerOne = new HumanPlayer();
+            playerOne = new HumanPlayer(BoardSpace.SpaceType.BLACK);
         } else {
             playerOne = new ComputerPlayer(arg1);
         }
 
         // Player 2
         if (arg2.equals("human")) {
-            playerTwo = new HumanPlayer();
+            playerTwo = new HumanPlayer(BoardSpace.SpaceType.WHITE);
         } else {
             playerTwo = new ComputerPlayer(arg2);
         }

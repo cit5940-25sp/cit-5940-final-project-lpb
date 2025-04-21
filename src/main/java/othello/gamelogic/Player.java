@@ -17,9 +17,12 @@ public abstract class Player {
 
     private BoardSpace.SpaceType color;
     public void setColor(BoardSpace.SpaceType color) {
+
         this.color = color;
     }
+
     public BoardSpace.SpaceType getColor() {
+
         return color;
     }
 
@@ -33,6 +36,75 @@ public abstract class Player {
      * @return a map with a destination BoardSpace mapped to a List of origin BoardSpaces.
      */
     public Map<BoardSpace, List<BoardSpace>> getAvailableMoves(BoardSpace[][] board) {
-        return null;
+
+        Map<BoardSpace, List<BoardSpace>> availableMoves = new HashMap<>();
+
+        // Check all 8 possible directions
+        int[] dx = {-1, -1, -1, 0, 0, 1, 1, 1};
+        int[] dy = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+        // Find all pieces owned by this player
+        for (BoardSpace space : playerOwnedSpaces) {
+            int x = space.getX();
+            int y = space.getY();
+
+            // Check each direction from this piece
+            for (int i = 0; i < 8; i++) {
+                int newX = x + dx[i];
+                int newY = y + dy[i];
+                List<BoardSpace> flipped = new ArrayList<>();
+
+                // Move in this direction until we find an empty space or edge
+                while (newX >= 0 && newX < board.length &&
+                        newY >= 0 && newY < board[0].length) {
+
+                    BoardSpace current = board[newX][newY];
+
+                    // If empty space, check if we have pieces to flip
+                    if (current.getType() == BoardSpace.SpaceType.EMPTY) {
+                        if (!flipped.isEmpty()) {
+                            // Valid move found - add to available moves
+                            if (!availableMoves.containsKey(current)) {
+                                availableMoves.put(current, new ArrayList<>());
+                            }
+                            availableMoves.get(current).add(space);
+                        }
+                        break;
+                    }
+                    // If opponent's piece, add to potential flips
+                    else if (current.getType() != color) {
+                        flipped.add(current);
+                    }
+                    // If our own piece, stop searching this direction
+                    else {
+                        break;
+                    }
+
+                    newX += dx[i];
+                    newY += dy[i];
+                }
+            }
+        }
+
+        return availableMoves;
+    }
+
+
+    /**
+     * Adds a space to this player's owned spaces
+     * @param space the space to add
+     */
+    public void addOwnedSpace(BoardSpace space) {
+        if (!playerOwnedSpaces.contains(space)) {
+            playerOwnedSpaces.add(space);
+        }
+    }
+
+    /**
+     * Removes a space from this player's owned spaces
+     * @param space the space to remove
+     */
+    public void removeOwnedSpace(BoardSpace space) {
+        playerOwnedSpaces.remove(space);
     }
 }
