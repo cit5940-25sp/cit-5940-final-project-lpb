@@ -62,7 +62,8 @@ public class OthelloGame {
         board = new BoardSpace[GAME_BOARD_SIZE][GAME_BOARD_SIZE];
         for (int i = 0; i < GAME_BOARD_SIZE; i++) {
             for (int j = 0; j < GAME_BOARD_SIZE; j++) {
-                board[i][j] = new BoardSpace(i, j, BoardSpace.SpaceType.EMPTY);
+                // Use Flyweight factory to get shared instances
+                board[i][j] = BoardSpace.getBoardSpace(i, j, BoardSpace.SpaceType.EMPTY);
             }
         }
     }

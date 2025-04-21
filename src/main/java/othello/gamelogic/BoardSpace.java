@@ -1,24 +1,48 @@
 package othello.gamelogic;
 
 import javafx.scene.paint.Color;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a logical space on the Othello Board.
  * Keeps track of coordinates and the type of the current space.
+ * Implements Flyweight pattern to share instances.
  */
+
 public class BoardSpace {
 
     private final int x;
     private final int y;
     private SpaceType type;
 
+    // Flyweight factory: stores shared instances of BoardSpace
+    private static final Map<String, BoardSpace> boardSpaceCache = new HashMap<>();
+
     public BoardSpace(int x, int y, SpaceType type) {
         this.x = x;
         this.y = y;
-        setType(type);
+        this.type = type;
     }
 
-    // Copy constructor
+    /**
+     * Flyweight factory method to get or create a BoardSpace instance.
+     * @param x The x-coordinate of the space.
+     * @param y The y-coordinate of the space.
+     * @param type The type of the space.
+     * @return The shared BoardSpace instance.
+     */
+    public static BoardSpace getBoardSpace(int x, int y, SpaceType type) {
+        String key = x + "," + y + "," + type.name(); // Unique key for each combination
+        BoardSpace space = boardSpaceCache.get(key);
+        if (space == null) {
+            space = new BoardSpace(x, y, type);
+            boardSpaceCache.put(key, space);
+        }
+        return space;
+    }
+
+    // Copy constructor (optional, if needed)
     public BoardSpace(BoardSpace other) {
         this.x = other.x;
         this.y = other.y;
@@ -29,6 +53,7 @@ public class BoardSpace {
      * @return the x coordinate of this space
      */
     public int getX() {
+
         return x;
     }
 
@@ -36,6 +61,7 @@ public class BoardSpace {
      * @return the x coordinate of this space
      */
     public int getY() {
+
         return y;
     }
 
@@ -43,6 +69,7 @@ public class BoardSpace {
      * @return the Space of the current tile
      */
     public SpaceType getType() {
+
         return type;
     }
 
@@ -51,6 +78,7 @@ public class BoardSpace {
      * @param type Space to set this space to.
      */
     public void setType(SpaceType type) {
+
         this.type = type;
     }
 
@@ -65,10 +93,12 @@ public class BoardSpace {
         private final Color fill;
 
         SpaceType(Color fill) {
+
             this.fill = fill;
         }
 
         public Color fill() {
+
             return fill;
         }
     }
