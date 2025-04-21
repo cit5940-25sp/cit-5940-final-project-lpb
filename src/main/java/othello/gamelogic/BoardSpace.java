@@ -1,5 +1,5 @@
 package othello.gamelogic;
-
+import java.util.Objects;
 import javafx.scene.paint.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,4 +102,18 @@ public class BoardSpace {
             return fill;
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BoardSpace that = (BoardSpace) o;
+        return x == that.x && y == that.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
 }

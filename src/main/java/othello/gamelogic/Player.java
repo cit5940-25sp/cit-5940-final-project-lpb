@@ -47,21 +47,20 @@ public abstract class Player {
         for (BoardSpace space : playerOwnedSpaces) {
             int x = space.getX();
             int y = space.getY();
+            System.out.println("Checking from origin: (" + x + "," + y + ")"); // 打印当前检查的起点
 
             // Check each direction from this piece
             for (int i = 0; i < 8; i++) {
                 int newX = x + dx[i];
                 int newY = y + dy[i];
                 List<BoardSpace> flipped = new ArrayList<>();
-
                 // Move in this direction until we find an empty space or edge
                 while (newX >= 0 && newX < board.length &&
                         newY >= 0 && newY < board[0].length) {
-
                     BoardSpace current = board[newX][newY];
-
                     // If empty space, check if we have pieces to flip
                     if (current.getType() == BoardSpace.SpaceType.EMPTY) {
+                        System.out.println("      Found EMPTY.");
                         if (!flipped.isEmpty()) {
                             // Valid move found - add to available moves
                             if (!availableMoves.containsKey(current)) {
@@ -85,7 +84,6 @@ public abstract class Player {
                 }
             }
         }
-
         return availableMoves;
     }
 
