@@ -1,5 +1,8 @@
 package othello.gui;
 
+import javafx.animation.*;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -9,10 +12,15 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 import othello.gamelogic.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import javafx.util.Duration;
 
 /**
  * Manages the interaction between model and view of the game.
@@ -32,11 +40,154 @@ public class GameController  {
     @FXML
     private Button computerTurnBtn;
 
-    // Private variables
+    @FXML
+    private Label scoreLabel;
+    @FXML
+    private Label timeLabel;
     private OthelloGame og;
+
+    private Timeline gameTimer;
+    private int timeRemaining = 30;
+
+    // Private variables
+    @FXML
+    private Button startButton;
+
     private int skippedTurns;
     private GUISpace[][] guiBoard;
 
+
+
+    @FXML
+    public void initialize() {
+        System.out.println("Initializing components...");
+        System.out.println("computerTurnBtn: " + (computerTurnBtn != null));
+
+        // 只初始化计时器但不启动
+        gameTimer = new Timeline(
+                new KeyFrame(Duration.seconds(1), e -> {
+                    if (og != null) { // 确保og已初始化
+                        timeRemaining--;
+                        updateTimeDisplay();
+                        if (timeRemaining <= 0) {
+                            timeOut();
+                        }
+                    }
+                })
+        );
+        gameTimer.setCycleCount(Timeline.INDEFINITE);
+    }
+
+    private void initGameTimer() {
+        if (timeLabel == null) return;
+
+        // 添加计时器样式类
+        timeLabel.getStyleClass().add("dynamic-timer");
+
+        gameTimer = new Timeline(
+                new KeyFrame(Duration.seconds(1), e -> {
+                    timeRemaining--;
+                    updateTimeDisplay();
+                    if (timeRemaining <= 0) timeOut();
+                })
+        );
+        gameTimer.setCycleCount(Timeline.INDEFINITE);
+        resetTimer();
+    }
+
+    private void updateTimeDisplay() {
+        if (timeLabel != null) {
+            Platform.runLater(() -> {
+                // 使用更生动的显示格式
+                String timerText = String.format("⏱ %02d", timeRemaining);
+                timeLabel.setText(timerText);
+
+                if (timeRemaining <= 10) {
+                    timeLabel.getStyleClass().add("urgent");
+                    flashTimerWarning();
+                } else {
+                    timeLabel.getStyleClass().remove("urgent");
+                }
+            });
+        }
+    }
+    private void flashTimerWarning() {
+        if (timeLabel != null) {
+            FadeTransition ft = new FadeTransition(Duration.millis(300), timeLabel);
+            ft.setFromValue(1.0);
+            ft.setToValue(0.3);
+            ft.setCycleCount(4);
+            ft.setAutoReverse(true);
+            ft.play();
+        }
+    }
+
+    private void timeOut() {
+        System.out.println("Time out for " + og.getCurrentPlayer().getColor() + " player!");
+
+        // 1. 停止当前计时器
+        if (gameTimer != null) {
+            gameTimer.stop();
+        }
+
+        // 2. 显示超时信息
+        Platform.runLater(() -> {
+            turnLabel.setText("TIME OUT! " + og.getCurrentPlayer().getColor() + " skipped!");
+        });
+
+        // 3. 保存当前玩家引用
+        Player timedOutPlayer = og.getCurrentPlayer();
+
+        // 4. 直接切换到对手回合（无论当前是Human还是AI）
+        og.switchPlayer(); // 确保OthelloGame中已实现switchPlayer()
+        resetTimer();      // 重置对手的计时器
+
+        // 5. 处理游戏流程
+        if (timedOutPlayer instanceof HumanPlayer) {
+            // 如果是人类玩家超时，立即开始对手回合
+            takeTurn(og.getCurrentPlayer());
+        } else {
+            // 如果是AI超时（虽然不太可能），也切换回合
+            takeTurn(og.getCurrentPlayer());
+        }
+
+        // 6. 检查是否游戏结束
+        checkGameEndCondition();
+    }
+
+    private void checkGameEndCondition() {
+        // 获取双方玩家的合法移动
+        Map<BoardSpace, List<BoardSpace>> p1Moves = og.getAvailableMoves(og.getPlayerOne());
+        Map<BoardSpace, List<BoardSpace>> p2Moves = og.getAvailableMoves(og.getPlayerTwo());
+
+        // 检查游戏结束条件
+        boolean boardFull = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() +
+                og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() == 64;
+        boolean noValidMoves = p1Moves.isEmpty() && p2Moves.isEmpty();
+
+        if (boardFull || noValidMoves) {
+            gameOver();
+        }
+    }
+
+    private void resetTimer() {
+        if (og == null) return;
+
+        timeRemaining = 30; // 重置为30秒
+        updateTimeDisplay();
+
+        // 只有当前是人类玩家时才启动计时器
+        if (og.getCurrentPlayer() instanceof HumanPlayer) {
+            if (gameTimer != null) {
+                gameTimer.playFromStart();
+            }
+        } else {
+            // 如果是AI回合，停止计时器（AI不需要计时）
+            if (gameTimer != null) {
+                gameTimer.stop();
+            }
+        }
+    }
     /**
      * Starts the game, called after controller initialization  in start method of App.
      * Sets the 2 players, their colors, and creates an OthelloGame for logic handling.
@@ -45,35 +196,47 @@ public class GameController  {
      * @param arg2 type of player for player 2, either "human" or some computer strategy
      */
     public void initGame(String arg1, String arg2) {
-        Player playerOne;
-        Player playerTwo;
-        // Player 1
-        if (arg1.equals("human")) {
-            playerOne = new HumanPlayer(BoardSpace.SpaceType.BLACK);
-        } else {
-            playerOne = new ComputerPlayer(arg1);
+        // 1. UI组件空检查（新增startButton检查）
+        if (gameBoard == null || turnLabel == null || turnCircle == null ||
+                timeLabel == null || startButton == null) {
+            System.err.println("Error: Some UI components are not initialized!");
+            Platform.exit();
+            return;
         }
 
-        // Player 2
-        if (arg2.equals("human")) {
-            playerTwo = new HumanPlayer(BoardSpace.SpaceType.WHITE);
-        } else {
-            playerTwo = new ComputerPlayer(arg2);
-        }
+        // 2. 初始化玩家
+        Player playerOne = arg1.equals("human") ?
+                new HumanPlayer(BoardSpace.SpaceType.BLACK) :
+                new ComputerPlayer(arg1);
+        Player playerTwo = arg2.equals("human") ?
+                new HumanPlayer(BoardSpace.SpaceType.WHITE) :
+                new ComputerPlayer(arg2);
 
-        // Set Colors
+        // 3. 设置颜色
         playerOne.setColor(BoardSpace.SpaceType.BLACK);
         playerTwo.setColor(BoardSpace.SpaceType.WHITE);
 
-        // Make a new game, create the visual board and display it with initial spaces
+        // 4. 初始化游戏逻辑
         og = new OthelloGame(playerOne, playerTwo);
         guiBoard = new GUISpace[8][8];
         displayBoard();
         initSpaces();
 
-        // Player 1 starts the game
-        turnText(playerOne);
-        takeTurn(playerOne);
+        // 5. 初始化但不启动计时器
+        timeRemaining = 30;
+        updateTimeDisplay();
+        gameTimer.stop();
+
+        // 6. 准备阶段UI设置
+        Platform.runLater(() -> {
+            turnText(playerOne); // 显示当前玩家信息
+            startButton.setVisible(true); // 显示准备按钮
+            startButton.setText("READY TO START");
+            computerTurnBtn.setVisible(false); // 隐藏电脑回合按钮
+
+            // 禁用棋盘交互直到准备完成
+            gameBoard.setDisable(true);
+        });
     }
 
     /**
@@ -83,6 +246,10 @@ public class GameController  {
     @FXML
     protected void displayBoard() {
         BoardSpace[][] board = og.getBoard();
+        double boardWidth = board.length * GUISpace.SQUARE_SIZE;
+        double boardHeight = board[0].length * GUISpace.SQUARE_SIZE;
+        gameBoard.setPrefSize(boardWidth, boardHeight);
+
         for (BoardSpace[] spaces : board) {
             for (BoardSpace space : spaces) {
                 GUISpace guiSpace = new GUISpace(space.getX(), space.getY(), space.getType());
@@ -125,12 +292,45 @@ public class GameController  {
      */
     @FXML
     protected void turnText(Player player) {
-        String humanOrCom = player instanceof HumanPlayer ? "(Human)\n" : "(Computer)\n";
+        // 1. 设置棋子颜色（已移到独立显示区域）
         turnCircle.setFill(player.getColor().fill());
-        turnLabel.setText(
-                player.getColor() + "'s Turn\n" + humanOrCom + "Score: \n" +
-                        og.getPlayerOne().getColor() + ": " + og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + " - " +
-                        og.getPlayerTwo().getColor() + ": " + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size());
+
+        // 2. 生成状态文本（移除了emoji，因为棋子已独立显示）
+        String playerType = player instanceof HumanPlayer ? "Human" : "AI";
+        String statusText = String.format("%s's Turn\n(%s)",
+                player.getColor(),
+                playerType);
+
+        // 3. 更新状态标签
+        turnLabel.setText(statusText);
+
+        // 4. 更新得分显示（优化格式）
+        if (scoreLabel != null && og != null) {
+            int blackScore = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size();
+            int whiteScore = og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size();
+
+            // 更简洁的得分格式（去掉了重复的emoji）
+            scoreLabel.setText(String.format("Black: %02d   White: %02d",
+                    blackScore,
+                    whiteScore));
+
+            // 5. 动态调整得分文字颜色
+            Platform.runLater(() -> {
+                if (blackScore > whiteScore) {
+                    scoreLabel.setStyle("-fx-text-fill: #000000;");
+                } else if (whiteScore > blackScore) {
+                    scoreLabel.setStyle("-fx-text-fill: #ffffff;");
+                } else {
+                    scoreLabel.setStyle("-fx-text-fill: #cccccc;");
+                }
+            });
+        }
+
+        // 6. 添加进度条支持（需在FXML中添加ProgressBar组件）
+        // if (progressBar != null) {
+        //     double progress = (blackScore + whiteScore) / 64.0;
+        //     progressBar.setProgress(progress);
+        // }
     }
 
     /**
@@ -150,6 +350,13 @@ public class GameController  {
      */
     @FXML
     protected void takeTurn(Player player) {
+        if (computerTurnBtn == null) {
+            System.err.println("Warning: computerTurnBtn is null!");
+            return;
+        }
+
+        Objects.requireNonNull(computerTurnBtn, "Computer button not initialized");
+
         if (player instanceof HumanPlayer human) {
             computerTurnBtn.setVisible(false);
             showMoves(human);
@@ -205,37 +412,41 @@ public class GameController  {
 
     /**
      * Gets the computer decision, then selects the space.
-     * @param player a reference to the current computer player (could be player 1 or 2)
+     * @paramplayer a reference to the current computer player (could be player 1 or 2)
      */
     @FXML
-    protected void computerDecision(ComputerPlayer player) {
-        Map<BoardSpace, List<BoardSpace>> availableMoves = og.getAvailableMoves(player);
-        if (availableMoves == null) {
-            turnLabel.setText("Null move found for \n" + player.getColor() + "! \n Please implement \ncomputerDecision()!");
-        } else if (availableMoves.size() == 0) {
-            if (og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() != 64 && skippedTurns != 2) {
-                skipTurnText(player);
-                takeTurn(otherPlayer(player));
+    protected void computerDecision(ComputerPlayer computer) {
+        Map<BoardSpace, List<BoardSpace>> availableMoves = og.getAvailableMoves(computer);
+        if (availableMoves == null || availableMoves.isEmpty()) {
+            if (og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() +
+                    og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() != 64 && skippedTurns != 2) {
+                skipTurnText(computer);
+                takeTurn(otherPlayer(computer));
                 skippedTurns++;
-            } else if (skippedTurns == 2 || og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() == 64){
+            } else {
                 gameOver();
             }
+            return;
+        }
 
-        } else {
-            skippedTurns = 0;
-            BoardSpace selectedDestination = og.computerDecision(player);
-            // From all origins, path to the destination and take spaces
-            og.takeSpaces(player, otherPlayer(player), availableMoves, selectedDestination);
-            updateGUIBoard(player, availableMoves, selectedDestination);
+        try {
+            BoardSpace selectedDestination = og.computerDecision(computer);
+            og.takeSpaces(computer, otherPlayer(computer), availableMoves, selectedDestination);
+            updateGUIBoardWithAnimation(computer, availableMoves, selectedDestination);
 
-            // Redisplay the new board
             clearBoard();
             displayBoard();
+            turnText(otherPlayer(computer));
+            takeTurn(otherPlayer(computer));
 
-            // Next opponent turn
-            turnText(otherPlayer(player));
-            takeTurn(otherPlayer(player));
+            resetTimer();
+        } catch (IllegalStateException e) {
+            // 处理AI返回null的情况
+            skipTurnText(computer);
+            takeTurn(otherPlayer(computer));
         }
+
+        checkGameEndCondition();
 
     }
 
@@ -276,7 +487,7 @@ public class GameController  {
 
         // From all origins, path to the destination and take spaces
         og.takeSpaces(player, otherPlayer(player), availableMoves, selectedDestination);
-        updateGUIBoard(player, availableMoves, selectedDestination);
+        updateGUIBoardWithAnimation(player, availableMoves, selectedDestination);
 
         // Redisplay the new board
         clearBoard();
@@ -285,6 +496,8 @@ public class GameController  {
         // Next opponent turn
         turnText(otherPlayer(player));
         takeTurn(otherPlayer(player));
+
+        resetTimer();
     }
 
     /**
@@ -294,29 +507,84 @@ public class GameController  {
      * @param selectedDestination the selected destination from either user input or computer decision
      */
     @FXML
-    protected void updateGUIBoard(Player player, Map<BoardSpace, List<BoardSpace>> availableMoves, BoardSpace selectedDestination) {
-        List<BoardSpace> selectedOrigins = availableMoves.get(selectedDestination);
-        for (BoardSpace selectedOrigin : selectedOrigins) {
-            int offsetX = selectedDestination.getX() - selectedOrigin.getX();
-            int offsetY = selectedDestination.getY() - selectedOrigin.getY();
-            // Intercardinals
-            if (Math.abs(offsetX) > 0 && Math.abs(offsetY) > 0) {
-                for (int i = 0; i < Math.abs(offsetX) + 1; i++) {
-                    int x = (int) (selectedOrigin.getX() + (i * Math.signum((offsetX))));
-                    int y = (int) (selectedOrigin.getY() + (i * Math.signum((offsetY))));
-                    guiBoard[x][y].addOrUpdateDisc(player.getColor());
-                }
-            } else { // Cardinals
-                // Origin -> Destination
-                for (int i = 0; i < Math.abs(offsetX) + 1; i++) {
-                    for (int j = 0; j < Math.abs(offsetY) + 1; j++) {
-                        int x = (int) (selectedOrigin.getX() + (i * Math.signum((offsetX))));
-                        int y = (int) (selectedOrigin.getY() + (j * Math.signum((offsetY))));
-                        guiBoard[x][y].addOrUpdateDisc(player.getColor());
-                    }
+    protected void updateGUIBoardWithAnimation(Player player,
+                                               Map<BoardSpace, List<BoardSpace>> availableMoves,
+                                               BoardSpace selectedDestination) {
+        // 1. 放置新棋子动画
+        GUISpace destinationSpace = guiBoard[selectedDestination.getX()][selectedDestination.getY()];
+        Circle disc = destinationSpace.getDisc();
+
+        if (disc != null) {
+            ScaleTransition placeAnim = new ScaleTransition(Duration.millis(200), disc);
+            placeAnim.setFromX(0.1);
+            placeAnim.setFromY(0.1);
+            placeAnim.setToX(1.0);
+            placeAnim.setToY(1.0);
+            placeAnim.play();
+        }
+
+        // 2. 翻转动画
+        Timeline flipTimeline = new Timeline();
+        int delay = 0;
+
+        for (BoardSpace origin : availableMoves.get(selectedDestination)) {
+            List<BoardSpace> path = calculatePath(origin, selectedDestination);
+
+            for (BoardSpace space : path) {
+                GUISpace guiSpace = guiBoard[space.getX()][space.getY()];
+                Circle flipDisc = guiSpace.getDisc();
+
+                if (flipDisc != null) {
+                    KeyFrame flipFrame = new KeyFrame(
+                            Duration.millis(delay),
+                            e -> {
+                                RotateTransition rt = new RotateTransition(Duration.millis(150), flipDisc);
+                                rt.setFromAngle(0.0);
+                                rt.setToAngle(180.0);
+                                rt.setOnFinished(event -> guiSpace.addOrUpdateDisc(player.getColor()));
+                                rt.play();
+                            }
+                    );
+                    flipTimeline.getKeyFrames().add(flipFrame);
+                    delay += 100;
                 }
             }
         }
+
+        flipTimeline.setOnFinished(e -> {
+            clearBoard();
+            displayBoard();
+            resetTimer();
+        });
+        flipTimeline.play();
+    }
+
+    private List<BoardSpace> calculatePath(BoardSpace start, BoardSpace end) {
+        List<BoardSpace> path = new ArrayList<>();
+        int x1 = start.getX(), y1 = start.getY();
+        int x2 = end.getX(), y2 = end.getY();
+
+        int dx = Integer.compare(x2, x1);
+        int dy = Integer.compare(y2, y1);
+
+        int x = x1 + dx;
+        int y = y1 + dy;
+
+        while (x != x2 || y != y2) {
+            path.add(og.getBoard()[x][y]);
+            x += dx;
+            y += dy;
+        }
+
+        return path;
+    }
+
+    private void addFlipAnimation(Timeline timeline, int x, int y, BoardSpace.SpaceType type, int delay) {
+        KeyFrame keyFrame = new KeyFrame(
+                Duration.millis(delay),
+                e -> guiBoard[x][y].addOrUpdateDisc(type)
+        );
+        timeline.getKeyFrames().add(keyFrame);
     }
 
     /**
@@ -356,5 +624,40 @@ public class GameController  {
                     og.getPlayerOne().getColor() + ": " + og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + " - " +
                     og.getPlayerTwo().getColor() + ": " + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size());
         }
+    }
+
+    @FXML
+    protected void computerDecision(ActionEvent event) {
+        if (og != null && og.getCurrentPlayer() instanceof ComputerPlayer) {
+            computerDecision((ComputerPlayer) og.getCurrentPlayer());
+        }
+    }
+
+    @FXML
+    protected void startGame(ActionEvent event) {
+        // 1. 隐藏准备按钮
+        startButton.setVisible(false);
+
+        // 2. 启用棋盘交互
+        gameBoard.setDisable(false);
+
+        // 3. 显示开始提示
+        turnLabel.setText("GAME STARTED!");
+
+        // 4. 如果是人类玩家先手，启动计时器
+        if (og.getCurrentPlayer() instanceof HumanPlayer) {
+            gameTimer.playFromStart();
+        }
+
+        // 5. 开始第一个回合
+        takeTurn(og.getCurrentPlayer());
+
+        // 6. 添加视觉反馈
+        FadeTransition ft = new FadeTransition(Duration.seconds(1), turnLabel);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.3);
+        ft.setCycleCount(2);
+        ft.setAutoReverse(true);
+        ft.play();
     }
 }

@@ -12,10 +12,13 @@ public class OthelloGame {
     private BoardSpace[][] board;
     private final Player playerOne;
     private final Player playerTwo;
+    private Player currentPlayer;
 
     public OthelloGame(Player playerOne, Player playerTwo) {
         this.playerOne = playerOne;
         this.playerTwo = playerTwo;
+        this.currentPlayer = playerOne;
+
         initBoard();
         // Set up initial board configuration
         board[3][3].setType(BoardSpace.SpaceType.WHITE);
@@ -43,6 +46,14 @@ public class OthelloGame {
     public Player getPlayerTwo() {
 
         return  playerTwo;
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public void switchPlayer() {
+        currentPlayer = (currentPlayer == playerOne) ? playerTwo : playerOne;
     }
 
     /**
@@ -95,6 +106,11 @@ public class OthelloGame {
         }
     }
 
+
+    public Player getOtherPlayer() {
+        return (currentPlayer == playerOne) ? playerTwo : playerOne;
+    }
+
     /**
      * PART 1
      * TODO: Implement this method
@@ -118,6 +134,7 @@ public class OthelloGame {
                 flipPiecesBetween(origin, selectedDestination, actingPlayer, opponent);
             }
         }
+        switchPlayer();
     }
     /**
      * Helper method to flip all pieces between two spaces
@@ -158,8 +175,20 @@ public class OthelloGame {
      * @return the BoardSpace that was decided upon
      */
     public BoardSpace computerDecision(ComputerPlayer computer) {
+        BoardSpace move = computer.makeMove(board);
+        if (move == null) {
+            throw new IllegalStateException("Computer player returned null move");
+        }
+        return move;
+    }
 
-        return computer.makeMove(board);
+    public boolean isGameOver() {
+        Map<BoardSpace, List<BoardSpace>> p1Moves = getAvailableMoves(playerOne);
+        Map<BoardSpace, List<BoardSpace>> p2Moves = getAvailableMoves(playerTwo);
+
+        return getPlayerOne().getPlayerOwnedSpacesSpaces().size() +
+                getPlayerTwo().getPlayerOwnedSpacesSpaces().size() == 64 ||
+                (p1Moves.isEmpty() && p2Moves.isEmpty());
     }
 
 }

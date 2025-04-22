@@ -5,41 +5,66 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="othello.gui.GameController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="600.0" prefWidth="960.0"
+            xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="othello.gui.GameController"
+            stylesheets="@style.css">
+
+   <!-- 左侧游戏棋盘 -->
    <left>
-      <BorderPane prefHeight="600.0" prefWidth="650.0" BorderPane.alignment="CENTER">
-         <center>
-            <Pane fx:id="gameBoard" maxHeight="480.0" maxWidth="480.0" prefHeight="480.0" prefWidth="480.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Pane prefHeight="200.0" prefWidth="61.0" />
-               </children>
-            </Pane>
-         </center>
-      </BorderPane>
+      <StackPane styleClass="board-container">
+         <!-- 使用StackPane确保居中 -->
+         <Pane fx:id="gameBoard" styleClass="game-board">
+            <!-- 棋盘格子将通过代码动态添加 -->
+         </Pane>
+      </StackPane>
    </left>
+
+   <!-- 右侧控制面板 -->
+   <!-- 右侧控制面板 -->
    <right>
-      <Pane prefHeight="600.0" prefWidth="310.0" style="-fx-background-color: limegreen; -fx-border-color: black; -fx-border-width: 0 0 0 2;" BorderPane.alignment="CENTER">
-         <children>
-            <BorderPane prefHeight="600.0" prefWidth="310.0">
-               <center>
-                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="8.0" BorderPane.alignment="CENTER">
-                     <children>
-                        <Circle fx:id="turnCircle" fill="DODGERBLUE" radius="30.0" stroke="BLACK" strokeType="INSIDE" />
-                        <Label fx:id="turnLabel" contentDisplay="CENTER" text="Turn" textAlignment="CENTER" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="24.0" />
-                           </font>
-                        </Label>
-                        <Button fx:id="computerTurnBtn" mnemonicParsing="false" text="Take Computer Turn">
-                           <font>
-                              <Font size="16.0" />
-                           </font>
-                        </Button>
-                     </children>
-                  </VBox>
-               </center>
-            </BorderPane>
-         </children>
-      </Pane>
+      <VBox styleClass="control-panel" prefWidth="350" spacing="0" alignment="CENTER">
+         <!-- 顶部弹性空间（占位用） -->
+         <Region VBox.vgrow="ALWAYS" minHeight="50"/>
+
+         <!-- 主要内容组（保持原有结构） -->
+         <VBox alignment="CENTER" spacing="15">
+            <!-- 状态行 -->
+            <HBox alignment="CENTER" spacing="10">
+               <Circle fx:id="turnCircle" radius="15" styleClass="turn-indicator"/>
+               <Label fx:id="turnLabel" styleClass="status-text"/>
+            </HBox>
+
+            <!-- 计时器 -->
+            <VBox alignment="CENTER" spacing="5">
+               <Label text="TIME REMAINING" styleClass="section-title"/>
+               <HBox alignment="CENTER" spacing="5">
+                  <Label fx:id="timeLabel" text="00:30" styleClass="timer-countdown"/>
+               </HBox>
+            </VBox>
+
+            <!-- 得分 -->
+            <VBox alignment="CENTER" spacing="5">
+               <Label text="SCORE" styleClass="section-title"/>
+               <Label fx:id="scoreLabel" styleClass="score-display"/>
+            </VBox>
+
+            <!-- 按钮组 -->
+            <VBox alignment="CENTER" spacing="10">
+               <Button fx:id="startButton" text="Ready to Start"
+                       styleClass="start-button"
+                       onAction="#startGame"/>
+               <Button fx:id="computerTurnBtn"
+                       text="Take Computer Turn"
+                       styleClass="action-button"
+                       onAction="#computerDecision"/>
+            </VBox>
+         </VBox>
+
+         <!-- 底部弹性空间（占位用） -->
+         <Region VBox.vgrow="ALWAYS" minHeight="50"/>
+      </VBox>
    </right>
 </BorderPane>
