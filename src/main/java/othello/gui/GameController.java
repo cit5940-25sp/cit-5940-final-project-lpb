@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javafx.util.Duration;
 
 /**
  * Manages the interaction between model and view of the game.
@@ -63,10 +62,9 @@ public class GameController  {
         System.out.println("Initializing components...");
         System.out.println("computerTurnBtn: " + (computerTurnBtn != null));
 
-        // 只初始化计时器但不启动
         gameTimer = new Timeline(
                 new KeyFrame(Duration.seconds(1), e -> {
-                    if (og != null) { // 确保og已初始化
+                    if (og != null) {
                         timeRemaining--;
                         updateTimeDisplay();
                         if (timeRemaining <= 0) {
@@ -78,27 +76,26 @@ public class GameController  {
         gameTimer.setCycleCount(Timeline.INDEFINITE);
     }
 
-    private void initGameTimer() {
-        if (timeLabel == null) return;
-
-        // 添加计时器样式类
-        timeLabel.getStyleClass().add("dynamic-timer");
-
-        gameTimer = new Timeline(
-                new KeyFrame(Duration.seconds(1), e -> {
-                    timeRemaining--;
-                    updateTimeDisplay();
-                    if (timeRemaining <= 0) timeOut();
-                })
-        );
-        gameTimer.setCycleCount(Timeline.INDEFINITE);
-        resetTimer();
-    }
+//    private void initGameTimer() {
+//        if (timeLabel == null) return;
+//
+//        timeLabel.getStyleClass().add("dynamic-timer");
+//
+//        gameTimer = new Timeline(
+//                new KeyFrame(Duration.seconds(1), e -> {
+//                    timeRemaining--;
+//                    updateTimeDisplay();
+//                    if (timeRemaining <= 0) timeOut();
+//                })
+//        );
+//        gameTimer.setCycleCount(Timeline.INDEFINITE);
+//        resetTimer();
+//    }
 
     private void updateTimeDisplay() {
         if (timeLabel != null) {
             Platform.runLater(() -> {
-                // 使用更生动的显示格式
+
                 String timerText = String.format("⏱ %02d", timeRemaining);
                 timeLabel.setText(timerText);
 
@@ -125,42 +122,39 @@ public class GameController  {
     private void timeOut() {
         System.out.println("Time out for " + og.getCurrentPlayer().getColor() + " player!");
 
-        // 1. 停止当前计时器
         if (gameTimer != null) {
             gameTimer.stop();
         }
 
-        // 2. 显示超时信息
         Platform.runLater(() -> {
             turnLabel.setText("TIME OUT! " + og.getCurrentPlayer().getColor() + " skipped!");
         });
 
-        // 3. 保存当前玩家引用
         Player timedOutPlayer = og.getCurrentPlayer();
 
-        // 4. 直接切换到对手回合（无论当前是Human还是AI）
-        og.switchPlayer(); // 确保OthelloGame中已实现switchPlayer()
-        resetTimer();      // 重置对手的计时器
+        // 4. Immediately switch to opponent's turn (regardless of whether current player is Human or AI)
+        og.switchPlayer(); // Ensure switchPlayer() is implemented in OthelloGame
+        resetTimer();      // Reset timer for the opponent
 
-        // 5. 处理游戏流程
+        // 5. Handle game flow
         if (timedOutPlayer instanceof HumanPlayer) {
-            // 如果是人类玩家超时，立即开始对手回合
+            // If human player timed out, immediately start opponent's turn
             takeTurn(og.getCurrentPlayer());
         } else {
-            // 如果是AI超时（虽然不太可能），也切换回合
+            // If AI timed out (unlikely but possible), also switch turns
             takeTurn(og.getCurrentPlayer());
         }
 
-        // 6. 检查是否游戏结束
+        // 6. Check if game has ended
         checkGameEndCondition();
     }
 
     private void checkGameEndCondition() {
-        // 获取双方玩家的合法移动
+        // Get valid moves for both players
         Map<BoardSpace, List<BoardSpace>> p1Moves = og.getAvailableMoves(og.getPlayerOne());
         Map<BoardSpace, List<BoardSpace>> p2Moves = og.getAvailableMoves(og.getPlayerTwo());
 
-        // 检查游戏结束条件
+        // Check game end conditions
         boolean boardFull = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() +
                 og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() == 64;
         boolean noValidMoves = p1Moves.isEmpty() && p2Moves.isEmpty();
@@ -173,16 +167,16 @@ public class GameController  {
     private void resetTimer() {
         if (og == null) return;
 
-        timeRemaining = 30; // 重置为30秒
+        timeRemaining = 30; // Reset to 30 seconds
         updateTimeDisplay();
 
-        // 只有当前是人类玩家时才启动计时器
+        // Only start timer if current player is human
         if (og.getCurrentPlayer() instanceof HumanPlayer) {
             if (gameTimer != null) {
                 gameTimer.playFromStart();
             }
         } else {
-            // 如果是AI回合，停止计时器（AI不需要计时）
+            // If it's AI's turn, stop timer (AI doesn't need timer)
             if (gameTimer != null) {
                 gameTimer.stop();
             }
@@ -196,7 +190,7 @@ public class GameController  {
      * @param arg2 type of player for player 2, either "human" or some computer strategy
      */
     public void initGame(String arg1, String arg2) {
-        // 1. UI组件空检查（新增startButton检查）
+        // 1. Null check for UI components (added startButton check)
         if (gameBoard == null || turnLabel == null || turnCircle == null ||
                 timeLabel == null || startButton == null) {
             System.err.println("Error: Some UI components are not initialized!");
@@ -204,7 +198,7 @@ public class GameController  {
             return;
         }
 
-        // 2. 初始化玩家
+        // 2. Initialize players
         Player playerOne = arg1.equals("human") ?
                 new HumanPlayer(BoardSpace.SpaceType.BLACK) :
                 new ComputerPlayer(arg1);
@@ -212,33 +206,32 @@ public class GameController  {
                 new HumanPlayer(BoardSpace.SpaceType.WHITE) :
                 new ComputerPlayer(arg2);
 
-        // 3. 设置颜色
+        // 3. Set player colors
         playerOne.setColor(BoardSpace.SpaceType.BLACK);
         playerTwo.setColor(BoardSpace.SpaceType.WHITE);
 
-        // 4. 初始化游戏逻辑
+        // 4. Initialize game logic
         og = new OthelloGame(playerOne, playerTwo);
         guiBoard = new GUISpace[8][8];
         displayBoard();
         initSpaces();
 
-        // 5. 初始化但不启动计时器
+        // 5. Initialize timer but don't start it
         timeRemaining = 30;
         updateTimeDisplay();
         gameTimer.stop();
 
-        // 6. 准备阶段UI设置
+        // 6. Setup UI for preparation phase
         Platform.runLater(() -> {
-            turnText(playerOne); // 显示当前玩家信息
-            startButton.setVisible(true); // 显示准备按钮
+            turnText(playerOne); // Display current player info
+            startButton.setVisible(true); // Show ready button
             startButton.setText("READY TO START");
-            computerTurnBtn.setVisible(false); // 隐藏电脑回合按钮
+            computerTurnBtn.setVisible(false); // Hide computer turn button
 
-            // 禁用棋盘交互直到准备完成
+            // Disable board interaction until ready
             gameBoard.setDisable(true);
         });
     }
-
     /**
      * Displays the board initially, adding the GUI squares into the window.
      * Also adds the initial state of the board with black and white taking spaces at the center.
@@ -292,29 +285,29 @@ public class GameController  {
      */
     @FXML
     protected void turnText(Player player) {
-        // 1. 设置棋子颜色（已移到独立显示区域）
+        // 1. Set piece color (moved to independent display area)
         turnCircle.setFill(player.getColor().fill());
 
-        // 2. 生成状态文本（移除了emoji，因为棋子已独立显示）
+        // 2. Generate status text (removed emoji since piece is now displayed separately)
         String playerType = player instanceof HumanPlayer ? "Human" : "AI";
         String statusText = String.format("%s's Turn\n(%s)",
                 player.getColor(),
                 playerType);
 
-        // 3. 更新状态标签
+        // 3. Update status label
         turnLabel.setText(statusText);
 
-        // 4. 更新得分显示（优化格式）
+        // 4. Update score display (optimized format)
         if (scoreLabel != null && og != null) {
             int blackScore = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size();
             int whiteScore = og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size();
 
-            // 更简洁的得分格式（去掉了重复的emoji）
+            // More concise score format (removed duplicate emoji)
             scoreLabel.setText(String.format("Black: %02d   White: %02d",
                     blackScore,
                     whiteScore));
 
-            // 5. 动态调整得分文字颜色
+            // 5. Dynamically adjust score text color
             Platform.runLater(() -> {
                 if (blackScore > whiteScore) {
                     scoreLabel.setStyle("-fx-text-fill: #000000;");
@@ -326,7 +319,7 @@ public class GameController  {
             });
         }
 
-        // 6. 添加进度条支持（需在FXML中添加ProgressBar组件）
+        // 6. Progress bar support (requires adding ProgressBar component in FXML)
         // if (progressBar != null) {
         //     double progress = (blackScore + whiteScore) / 64.0;
         //     progressBar.setProgress(progress);
@@ -441,7 +434,7 @@ public class GameController  {
 
             resetTimer();
         } catch (IllegalStateException e) {
-            // 处理AI返回null的情况
+
             skipTurnText(computer);
             takeTurn(otherPlayer(computer));
         }
@@ -510,7 +503,7 @@ public class GameController  {
     protected void updateGUIBoardWithAnimation(Player player,
                                                Map<BoardSpace, List<BoardSpace>> availableMoves,
                                                BoardSpace selectedDestination) {
-        // 1. 放置新棋子动画
+
         GUISpace destinationSpace = guiBoard[selectedDestination.getX()][selectedDestination.getY()];
         Circle disc = destinationSpace.getDisc();
 
@@ -523,7 +516,7 @@ public class GameController  {
             placeAnim.play();
         }
 
-        // 2. 翻转动画
+
         Timeline flipTimeline = new Timeline();
         int delay = 0;
 
@@ -635,24 +628,24 @@ public class GameController  {
 
     @FXML
     protected void startGame(ActionEvent event) {
-        // 1. 隐藏准备按钮
+        // 1. Hide the ready button
         startButton.setVisible(false);
 
-        // 2. 启用棋盘交互
+        // 2. Enable board interaction
         gameBoard.setDisable(false);
 
-        // 3. 显示开始提示
+        // 3. Show game start notification
         turnLabel.setText("GAME STARTED!");
 
-        // 4. 如果是人类玩家先手，启动计时器
+        // 4. If human player goes first, start the timer
         if (og.getCurrentPlayer() instanceof HumanPlayer) {
             gameTimer.playFromStart();
         }
 
-        // 5. 开始第一个回合
+        // 5. Begin the first turn
         takeTurn(og.getCurrentPlayer());
 
-        // 6. 添加视觉反馈
+        // 6. Add visual feedback
         FadeTransition ft = new FadeTransition(Duration.seconds(1), turnLabel);
         ft.setFromValue(1.0);
         ft.setToValue(0.3);
@@ -660,4 +653,5 @@ public class GameController  {
         ft.setAutoReverse(true);
         ft.play();
     }
+
 }

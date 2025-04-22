@@ -12,32 +12,31 @@
             fx:controller="othello.gui.GameController"
             stylesheets="@style.css">
 
-   <!-- 左侧游戏棋盘 -->
+   <!-- Left game board section -->
    <left>
       <StackPane styleClass="board-container">
-         <!-- 使用StackPane确保居中 -->
+         <!-- Using StackPane to ensure centering -->
          <Pane fx:id="gameBoard" styleClass="game-board">
-            <!-- 棋盘格子将通过代码动态添加 -->
+            <!-- Board tiles will be added dynamically through code -->
          </Pane>
       </StackPane>
    </left>
 
-   <!-- 右侧控制面板 -->
-   <!-- 右侧控制面板 -->
+   <!-- Right control panel section -->
    <right>
       <VBox styleClass="control-panel" prefWidth="350" spacing="0" alignment="CENTER">
-         <!-- 顶部弹性空间（占位用） -->
+         <!-- Top flexible spacer (for layout purposes) -->
          <Region VBox.vgrow="ALWAYS" minHeight="50"/>
 
-         <!-- 主要内容组（保持原有结构） -->
+         <!-- Main content group (keeping original structure) -->
          <VBox alignment="CENTER" spacing="15">
-            <!-- 状态行 -->
+            <!-- Status indicator row -->
             <HBox alignment="CENTER" spacing="10">
                <Circle fx:id="turnCircle" radius="15" styleClass="turn-indicator"/>
                <Label fx:id="turnLabel" styleClass="status-text"/>
             </HBox>
 
-            <!-- 计时器 -->
+            <!-- Timer section -->
             <VBox alignment="CENTER" spacing="5">
                <Label text="TIME REMAINING" styleClass="section-title"/>
                <HBox alignment="CENTER" spacing="5">
@@ -45,13 +44,13 @@
                </HBox>
             </VBox>
 
-            <!-- 得分 -->
+            <!-- Score section -->
             <VBox alignment="CENTER" spacing="5">
                <Label text="SCORE" styleClass="section-title"/>
                <Label fx:id="scoreLabel" styleClass="score-display"/>
             </VBox>
 
-            <!-- 按钮组 -->
+            <!-- Button group -->
             <VBox alignment="CENTER" spacing="10">
                <Button fx:id="startButton" text="Ready to Start"
                        styleClass="start-button"
@@ -63,7 +62,7 @@
             </VBox>
          </VBox>
 
-         <!-- 底部弹性空间（占位用） -->
+         <!-- Bottom flexible spacer (for layout purposes) -->
          <Region VBox.vgrow="ALWAYS" minHeight="50"/>
       </VBox>
    </right>

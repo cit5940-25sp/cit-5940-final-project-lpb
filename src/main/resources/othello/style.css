@@ -1,4 +1,4 @@
-/* 动态计时器样式 */
+/* Dynamic timer styles */
 .dynamic-timer {
     -fx-font-family: 'Digital', monospace;
     -fx-font-size: 24px;
@@ -11,7 +11,7 @@
     -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.3), 3, 0.7, 0, 1);
 }
 
-/* 状态卡片样式 */
+/* Status card styles */
 .status-card {
     -fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
     -fx-background-radius: 10;
@@ -21,14 +21,14 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
 }
 
-/* 得分显示样式 */
+/* Score display styles */
 .score-display {
     -fx-font-size: 18px;
     -fx-text-fill: #333;
     -fx-font-weight: bold;
 }
 
-/* 右侧面板基础样式 */
+/* Right panel base styles */
 .right-panel {
     -fx-background-color: linear-gradient(to bottom, #2c3e50, #4ca1af);
     -fx-border-color: rgba(255,255,255,0.1);
@@ -37,7 +37,7 @@
     -fx-alignment: CENTER;
 }
 
-/* 控制面板背景 */
+/* Control panel background */
 .control-panel {
     -fx-background-color: linear-gradient(to bottom, #2c3e50, #4ca1af);
     -fx-padding: 25px; /* 增加内边距 */
@@ -48,7 +48,7 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
 }
 
-/* 棋盘背景 */
+
 .board-container {
     -fx-background-color: white;
     -fx-alignment: center; /* 关键居中属性 */
@@ -62,7 +62,7 @@
 }
 
 
-/* 各部分标题统一 */
+
 .section-title {
     -fx-text-fill: rgba(255,255,255,0.8);
     -fx-font-size: 16px;
@@ -70,7 +70,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 1);
 }
 
-/* 状态卡片增强 */
+
 .status-card {
     -fx-background-color: rgba(0,0,0,0.25);
     -fx-background-radius: 15;
@@ -100,12 +100,11 @@
     -fx-text-fill: #000000;
 }
 
-/* 计时器部分优化 */
 .timer-section {
     -fx-padding: 10px 0;
 }
 
-/* 计时器样式 */
+
 .timer-container {
     -fx-background-color: rgba(0, 0, 0, 0.3);
     -fx-background-radius: 15;
@@ -132,7 +131,7 @@
     -fx-effect: innershadow(gaussian, rgba(255,0,0,0.8), 5, 0.5, 0, 0);
 }
 
-/* 得分面板 */
+
 .score-panel {
     -fx-padding: 15px;
     -fx-background-color: rgba(0,0,0,0.2);
@@ -151,13 +150,13 @@
     -fx-font-weight: bold;
 }
 
-/* 按钮位置调整 */
+
 .action-button {
     -fx-pref-width: 220px;
     -fx-alignment: CENTER;
 }
 
-/* 按钮样式 */
+
 .action-button {
     -fx-background-color: #3498db;
     -fx-text-fill: white;
