@@ -21,10 +21,10 @@ public class OthelloGame {
 
         initBoard();
         // Set up initial board configuration
-        board[3][3].setType(BoardSpace.SpaceType.WHITE);
-        board[3][4].setType(BoardSpace.SpaceType.BLACK);
-        board[4][3].setType(BoardSpace.SpaceType.BLACK);
-        board[4][4].setType(BoardSpace.SpaceType.WHITE);
+        board[3][3] = BoardSpace.getBoardSpace(3, 3, BoardSpace.SpaceType.WHITE);
+        board[3][4] = BoardSpace.getBoardSpace(3, 4, BoardSpace.SpaceType.BLACK);
+        board[4][3] = BoardSpace.getBoardSpace(4, 3, BoardSpace.SpaceType.BLACK);
+        board[4][4] = BoardSpace.getBoardSpace(4, 4, BoardSpace.SpaceType.WHITE);
 
         // Initialize player owned spaces
         playerOne.addOwnedSpace(board[3][4]);
@@ -102,6 +102,12 @@ public class OthelloGame {
 
             // Set new owner and add to player's owned spaces
             space.setType(actingPlayer.getColor());
+
+            // Get the flyweight instance for the new state (acting player's color)
+            BoardSpace newSpace = BoardSpace.getBoardSpace(x, y, actingPlayer.getColor());
+            // Update the board to point to this instance
+            board[x][y] = newSpace;
+            // Add the new instance to the acting player's owned list
             actingPlayer.addOwnedSpace(space);
         }
     }
@@ -156,10 +162,21 @@ public class OthelloGame {
         while (x != x2 || y != y2) {
             BoardSpace current = board[x][y];
 
-            // Flip the piece
-            current.setType(actingPlayer.getColor());
-            actingPlayer.addOwnedSpace(current);
-            opponent.removeOwnedSpace(current);
+            BoardSpace currentOriginal = board[x][y];
+
+            if (currentOriginal.getType() == opponent.getColor()) {
+                // Get the flyweight instance for the new state
+                BoardSpace currentNew = BoardSpace.getBoardSpace(x, y, actingPlayer.getColor());
+                // Update the board reference
+                board[x][y] = currentNew;
+
+                // Update ownership lists
+                opponent.removeOwnedSpace(currentOriginal);
+                actingPlayer.addOwnedSpace(currentNew);
+            } else {
+                System.err.println("Warning: Unexpected piece type at (" + x + "," + y + ") in flipPiecesBetween.");
+                break;
+            }
 
             x += dx;
             y += dy;
