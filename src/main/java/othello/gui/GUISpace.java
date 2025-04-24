@@ -41,7 +41,7 @@ public class GUISpace {
         squarePane.setLayoutY(location.getY());
         bg = new Rectangle(SQUARE_SIZE, SQUARE_SIZE);
         bg.setStroke(Color.BLACK);
-        bg.setFill(Color.LIMEGREEN);
+        bg.setFill(Color.SEAGREEN);
         squarePane.getChildren().add(bg);
     }
 
