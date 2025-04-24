@@ -1,8 +1,7 @@
 package othello.gui;
 
-import javafx.animation.*;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -10,648 +9,223 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
-import othello.gamelogic.*;
+import othello.gamelogic.BoardSpace;
+import othello.gamelogic.ComputerPlayer;
+import othello.gamelogic.HumanPlayer;
+import othello.gamelogic.OthelloGame;
+import othello.gamelogic.Player;
+import othello.gui.GUISpace;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-
 
 /**
- * Manages the interaction between model and view of the game.
+ * Manages the interaction between model and view of the game, with a 30s per-turn timer.
  */
-public class GameController  {
+public class GameController {
 
-    // FXML Variables to manipulate UI components
-    @FXML
-    private Label turnLabel;
+    @FXML private Label turnLabel;
+    @FXML private Pane gameBoard;
+    @FXML private Circle turnCircle;
+    @FXML private Button computerTurnBtn;
+    @FXML private Label timerLabel;
 
-    @FXML
-    private Pane gameBoard;
-
-    @FXML
-    private Circle turnCircle;
-
-    @FXML
-    private Button computerTurnBtn;
-
-    @FXML
-    private Label scoreLabel;
-    @FXML
-    private Label timeLabel;
     private OthelloGame og;
-
-    private Timeline gameTimer;
-    private int timeRemaining = 30;
-
-    // Private variables
-    @FXML
-    private Button startButton;
-
-    private int skippedTurns;
     private GUISpace[][] guiBoard;
+    private Player currentPlayer;
+    private int skippedTurns;
 
+    // Timer
+    private Timeline turnTimer;
+    private int timeRemaining;
 
-
-    @FXML
-    public void initialize() {
-        System.out.println("Initializing components...");
-        System.out.println("computerTurnBtn: " + (computerTurnBtn != null));
-
-        gameTimer = new Timeline(
-                new KeyFrame(Duration.seconds(1), e -> {
-                    if (og != null) {
-                        timeRemaining--;
-                        updateTimeDisplay();
-                        if (timeRemaining <= 0) {
-                            timeOut();
-                        }
-                    }
-                })
-        );
-        gameTimer.setCycleCount(Timeline.INDEFINITE);
-    }
-
-//    private void initGameTimer() {
-//        if (timeLabel == null) return;
-//
-//        timeLabel.getStyleClass().add("dynamic-timer");
-//
-//        gameTimer = new Timeline(
-//                new KeyFrame(Duration.seconds(1), e -> {
-//                    timeRemaining--;
-//                    updateTimeDisplay();
-//                    if (timeRemaining <= 0) timeOut();
-//                })
-//        );
-//        gameTimer.setCycleCount(Timeline.INDEFINITE);
-//        resetTimer();
-//    }
-
-    private void updateTimeDisplay() {
-        if (timeLabel != null) {
-            Platform.runLater(() -> {
-
-                String timerText = String.format("⏱ %02d", timeRemaining);
-                timeLabel.setText(timerText);
-
-                if (timeRemaining <= 10) {
-                    timeLabel.getStyleClass().add("urgent");
-                    flashTimerWarning();
-                } else {
-                    timeLabel.getStyleClass().remove("urgent");
-                }
-            });
-        }
-    }
-    private void flashTimerWarning() {
-        if (timeLabel != null) {
-            FadeTransition ft = new FadeTransition(Duration.millis(300), timeLabel);
-            ft.setFromValue(1.0);
-            ft.setToValue(0.3);
-            ft.setCycleCount(4);
-            ft.setAutoReverse(true);
-            ft.play();
-        }
-    }
-
-    private void timeOut() {
-        System.out.println("Time out for " + og.getCurrentPlayer().getColor() + " player!");
-
-        if (gameTimer != null) {
-            gameTimer.stop();
-        }
-
-        Platform.runLater(() -> {
-            turnLabel.setText("TIME OUT! " + og.getCurrentPlayer().getColor() + " skipped!");
-        });
-
-        Player timedOutPlayer = og.getCurrentPlayer();
-
-        // 4. Immediately switch to opponent's turn (regardless of whether current player is Human or AI)
-        og.switchPlayer(); // Ensure switchPlayer() is implemented in OthelloGame
-        resetTimer();      // Reset timer for the opponent
-
-        // 5. Handle game flow
-        if (timedOutPlayer instanceof HumanPlayer) {
-            // If human player timed out, immediately start opponent's turn
-            takeTurn(og.getCurrentPlayer());
-        } else {
-            // If AI timed out (unlikely but possible), also switch turns
-            takeTurn(og.getCurrentPlayer());
-        }
-
-        // 6. Check if game has ended
-        checkGameEndCondition();
-    }
-
-    private void checkGameEndCondition() {
-        // Get valid moves for both players
-        Map<BoardSpace, List<BoardSpace>> p1Moves = og.getAvailableMoves(og.getPlayerOne());
-        Map<BoardSpace, List<BoardSpace>> p2Moves = og.getAvailableMoves(og.getPlayerTwo());
-
-        // Check game end conditions
-        boolean boardFull = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() +
-                og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() == 64;
-        boolean noValidMoves = p1Moves.isEmpty() && p2Moves.isEmpty();
-
-        if (boardFull || noValidMoves) {
-            gameOver();
-        }
-    }
-
-    private void resetTimer() {
-        if (og == null) return;
-
-        timeRemaining = 30; // Reset to 30 seconds
-        updateTimeDisplay();
-
-        // Only start timer if current player is human
-        if (og.getCurrentPlayer() instanceof HumanPlayer) {
-            if (gameTimer != null) {
-                gameTimer.playFromStart();
-            }
-        } else {
-            // If it's AI's turn, stop timer (AI doesn't need timer)
-            if (gameTimer != null) {
-                gameTimer.stop();
-            }
-        }
-    }
     /**
-     * Starts the game, called after controller initialization  in start method of App.
-     * Sets the 2 players, their colors, and creates an OthelloGame for logic handling.
-     * Then, shows the first move, beginning the game "loop".
-     * @param arg1 type of player for player 1, either "human" or some computer strategy
-     * @param arg2 type of player for player 2, either "human" or some computer strategy
+     * Called by App.start(): initialize game and UI.
      */
     public void initGame(String arg1, String arg2) {
-        // 1. Null check for UI components (added startButton check)
-        if (gameBoard == null || turnLabel == null || turnCircle == null ||
-                timeLabel == null || startButton == null) {
-            System.err.println("Error: Some UI components are not initialized!");
-            Platform.exit();
-            return;
+        Player p1;
+        if ("human".equals(arg1)) {
+            p1 = new HumanPlayer(BoardSpace.SpaceType.BLACK);
+        } else {
+            p1 = new ComputerPlayer(arg1);
         }
+        p1.setColor(BoardSpace.SpaceType.BLACK);
 
-        // 2. Initialize players
-        Player playerOne = arg1.equals("human") ?
-                new HumanPlayer(BoardSpace.SpaceType.BLACK) :
-                new ComputerPlayer(arg1);
-        Player playerTwo = arg2.equals("human") ?
-                new HumanPlayer(BoardSpace.SpaceType.WHITE) :
-                new ComputerPlayer(arg2);
+        Player p2;
+        if ("human".equals(arg2)) {
+            p2 = new HumanPlayer(BoardSpace.SpaceType.WHITE);
+        } else {
+            p2 = new ComputerPlayer(arg2);
+        }
+        p2.setColor(BoardSpace.SpaceType.WHITE);
 
-        // 3. Set player colors
-        playerOne.setColor(BoardSpace.SpaceType.BLACK);
-        playerTwo.setColor(BoardSpace.SpaceType.WHITE);
-
-        // 4. Initialize game logic
-        og = new OthelloGame(playerOne, playerTwo);
+        og = new OthelloGame(p1, p2);
         guiBoard = new GUISpace[8][8];
         displayBoard();
         initSpaces();
 
-        // 5. Initialize timer but don't start it
-        timeRemaining = 30;
-        updateTimeDisplay();
-        gameTimer.stop();
-
-        // 6. Setup UI for preparation phase
-        Platform.runLater(() -> {
-            turnText(playerOne); // Display current player info
-            startButton.setVisible(true); // Show ready button
-            startButton.setText("READY TO START");
-            computerTurnBtn.setVisible(false); // Hide computer turn button
-
-            // Disable board interaction until ready
-            gameBoard.setDisable(true);
-        });
+        skippedTurns = 0;
+        currentPlayer = p1;
+        updateTurnText();
+        startTurnTimer();
+        takeTurn(currentPlayer);
     }
-    /**
-     * Displays the board initially, adding the GUI squares into the window.
-     * Also adds the initial state of the board with black and white taking spaces at the center.
-     */
+
     @FXML
     protected void displayBoard() {
-        BoardSpace[][] board = og.getBoard();
-        double boardWidth = board.length * GUISpace.SQUARE_SIZE;
-        double boardHeight = board[0].length * GUISpace.SQUARE_SIZE;
-        gameBoard.setPrefSize(boardWidth, boardHeight);
-
-        for (BoardSpace[] spaces : board) {
-            for (BoardSpace space : spaces) {
-                GUISpace guiSpace = new GUISpace(space.getX(), space.getY(), space.getType());
-                Pane square = guiSpace.getSquare();
-                gameBoard.getChildren().add(square);
-                guiBoard[space.getX()][space.getY()] = guiSpace;
+        gameBoard.getChildren().clear();
+        for (BoardSpace[] row : og.getBoard()) {
+            for (BoardSpace space : row) {
+                GUISpace gs = new GUISpace(space.getX(), space.getY(), space.getType());
+                gameBoard.getChildren().add(gs.getSquare());
+                guiBoard[space.getX()][space.getY()] = gs;
             }
         }
     }
 
-    /**
-     * Clears the board visually, called every time the board is redisplayed after the first time
-     */
     @FXML
     protected void clearBoard() {
-        BoardSpace[][] board = og.getBoard();
-        for (BoardSpace[] spaces : board) {
-            for (BoardSpace space : spaces) {
-                GUISpace guiSpace = guiBoard[space.getX()][space.getY()];
-                Pane square = guiSpace.getSquare();
-                gameBoard.getChildren().remove(square);
-            }
-        }
+        gameBoard.getChildren().clear();
     }
 
-    /**
-     * Sets the initial state of the Othello board
-     */
     @FXML
-    protected void initSpaces(){
-        // Initial spaces
+    protected void initSpaces() {
         guiBoard[3][3].addOrUpdateDisc(BoardSpace.SpaceType.WHITE);
         guiBoard[4][4].addOrUpdateDisc(BoardSpace.SpaceType.WHITE);
         guiBoard[3][4].addOrUpdateDisc(BoardSpace.SpaceType.BLACK);
         guiBoard[4][3].addOrUpdateDisc(BoardSpace.SpaceType.BLACK);
     }
 
-    /**
-     * Displays the score of the board and the current turn.
-     */
-    @FXML
-    protected void turnText(Player player) {
-        // 1. Set piece color (moved to independent display area)
-        turnCircle.setFill(player.getColor().fill());
-
-        // 2. Generate status text (removed emoji since piece is now displayed separately)
-        String playerType = player instanceof HumanPlayer ? "Human" : "AI";
-        String statusText = String.format("%s's Turn\n(%s)",
-                player.getColor(),
-                playerType);
-
-        // 3. Update status label
-        turnLabel.setText(statusText);
-
-        // 4. Update score display (optimized format)
-        if (scoreLabel != null && og != null) {
-            int blackScore = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size();
-            int whiteScore = og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size();
-
-            // More concise score format (removed duplicate emoji)
-            scoreLabel.setText(String.format("Black: %02d   White: %02d",
-                    blackScore,
-                    whiteScore));
-
-            // 5. Dynamically adjust score text color
-            Platform.runLater(() -> {
-                if (blackScore > whiteScore) {
-                    scoreLabel.setStyle("-fx-text-fill: #000000;");
-                } else if (whiteScore > blackScore) {
-                    scoreLabel.setStyle("-fx-text-fill: #ffffff;");
-                } else {
-                    scoreLabel.setStyle("-fx-text-fill: #cccccc;");
-                }
-            });
-        }
-
-        // 6. Progress bar support (requires adding ProgressBar component in FXML)
-        // if (progressBar != null) {
-        //     double progress = (blackScore + whiteScore) / 64.0;
-        //     progressBar.setProgress(progress);
-        // }
-    }
-
-    /**
-     * Displays the score of the board.
-     */
-    @FXML
-    protected void skipTurnText(Player player) {
-        turnLabel.setText(
-                "Skipped " + player.getColor() + " due to no moves available! " + otherPlayer(player).getColor() + "'s Turn\n" +
-                        og.getPlayerOne().getColor() + ": " + og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + " - " +
-                        og.getPlayerTwo().getColor() + ": " + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size());
-    }
-
-    /**
-     * Either shows moves for humans or makes a decision for a computer.
-     * @param player player to take a turn for, whether its human or computer
-     */
     @FXML
     protected void takeTurn(Player player) {
-        if (computerTurnBtn == null) {
-            System.err.println("Warning: computerTurnBtn is null!");
-            return;
-        }
+        currentPlayer = player;
+        updateTurnText();
+        startTurnTimer();
 
-        Objects.requireNonNull(computerTurnBtn, "Computer button not initialized");
-
-        if (player instanceof HumanPlayer human) {
+        if (player instanceof HumanPlayer) {
             computerTurnBtn.setVisible(false);
-            showMoves(human);
-        } else if (player instanceof ComputerPlayer computer) {
+            showMoves((HumanPlayer) player);
+        } else {
             computerTurnBtn.setVisible(true);
-            computerTurnBtn.setOnAction(actionEvent -> {
-                computerDecision(computer);
-            });
+            computerTurnBtn.setOnAction(e -> computerDecision((ComputerPlayer) player));
         }
     }
 
-    /**
-     * Shows the current moves possible for the current board configuration.
-     * If availableMoves is null, the getAvailableMoves method is likely not implemented yet.
-     * If availableMoves is empty (no moves found, or full board), the game ends.
-     * @param player player to show moves for
-     */
     @FXML
     protected void showMoves(HumanPlayer player) {
-        Map<BoardSpace, List<BoardSpace>> availableMoves = og.getAvailableMoves(player);
-        if (availableMoves == null) {
-            turnLabel.setText("Null move found for \n" + player.getColor() + "! \n Please implement \ngetAvailableMoves()!");
-        } else if (availableMoves.size() == 0) {
-            if (og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() != 64 && skippedTurns != 2) {
-                skipTurnText(player);
-                takeTurn(otherPlayer(player));
-                skippedTurns++;
-            } else if (skippedTurns == 2 || og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() == 64){
-                gameOver();
-            }
-
-        } else {
-            skippedTurns = 0;
-            for (BoardSpace destination : availableMoves.keySet()) {
-                // Attach hover listener (Enter, Exit) to each Pane
-                GUISpace guiSpace = guiBoard[destination.getX()][destination.getY()];
-                Pane currPane = guiSpace.getSquare();
-                guiSpace.setBgColor(Color.LIGHTYELLOW);
-                EventHandler<MouseEvent> enter = event -> guiSpace.setBgColor(Color.LIME);
-                EventHandler<MouseEvent> exit = event -> guiSpace.setBgColor(Color.LIGHTYELLOW);
-                currPane.addEventHandler(MouseEvent.MOUSE_ENTERED, enter);
-                currPane.addEventHandler(MouseEvent.MOUSE_EXITED, exit);
-                // Click removes hovers
-                currPane.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-                    currPane.removeEventHandler(MouseEvent.MOUSE_ENTERED, enter);
-                    currPane.removeEventHandler(MouseEvent.MOUSE_EXITED, exit);
-                    selectSpace(player, availableMoves, destination);
-                });
-            }
-        }
-
-    }
-
-    /**
-     * Gets the computer decision, then selects the space.
-     * @paramplayer a reference to the current computer player (could be player 1 or 2)
-     */
-    @FXML
-    protected void computerDecision(ComputerPlayer computer) {
-        Map<BoardSpace, List<BoardSpace>> availableMoves = og.getAvailableMoves(computer);
-        if (availableMoves == null || availableMoves.isEmpty()) {
-            if (og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() +
-                    og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size() != 64 && skippedTurns != 2) {
-                skipTurnText(computer);
-                takeTurn(otherPlayer(computer));
-                skippedTurns++;
-            } else {
-                gameOver();
-            }
+        displayBoard();
+        Map<BoardSpace, List<BoardSpace>> moves = og.getAvailableMoves(player);
+        if (moves == null) {
+            turnLabel.setText("Error: getAvailableMoves() returned null");
             return;
         }
-
-        try {
-            BoardSpace selectedDestination = og.computerDecision(computer);
-            og.takeSpaces(computer, otherPlayer(computer), availableMoves, selectedDestination);
-            updateGUIBoardWithAnimation(computer, availableMoves, selectedDestination);
-
-            clearBoard();
-            displayBoard();
-            turnText(otherPlayer(computer));
-            takeTurn(otherPlayer(computer));
-
-            resetTimer();
-        } catch (IllegalStateException e) {
-
-            skipTurnText(computer);
-            takeTurn(otherPlayer(computer));
+        if (moves.isEmpty()) {
+            handleNoMoves();
+            return;
         }
-
-        checkGameEndCondition();
-
-    }
-
-    /**
-     * Handles what happens when a player chooses to select a certain space during their turn.
-     * @param player current turn's player
-     * @param availableMoves the available moves gotten from showMoves earlier
-     * @param selectedDestination the selected destination space that was clicked on
-     */
-    @FXML
-    protected void selectSpace(Player player, Map<BoardSpace, List<BoardSpace>> availableMoves, BoardSpace selectedDestination) {
-        // Remove other handlers by reinitializing empty spaces where they are
-        for (BoardSpace destination : availableMoves.keySet()) {
-            GUISpace guiSpace = guiBoard[destination.getX()][destination.getY()];
-            if (destination != selectedDestination) {
-                // Reinit unselected spaces, to remove event handlers
-                og.getBoard()[destination.getX()][destination.getY()] =
-                        new BoardSpace(destination.getX(), destination.getY(), BoardSpace.SpaceType.EMPTY);
-                gameBoard.getChildren().remove(guiSpace.getSquare());
-                GUISpace newGuiSpace = new GUISpace(destination.getX(), destination.getY(), BoardSpace.SpaceType.EMPTY);
-                Pane newSquare = newGuiSpace.getSquare();
-                gameBoard.getChildren().add(newSquare);
-                guiBoard[destination.getX()][destination.getY()] = guiSpace;
-            } else {
-                og.getBoard()[destination.getX()][destination.getY()] =
-                        new BoardSpace(destination.getX(), destination.getY(), player.getColor());
-                gameBoard.getChildren().remove(guiSpace.getSquare());
-                GUISpace newGuiSpace = new GUISpace(destination.getX(), destination.getY(), player.getColor());
-                Pane newSquare = newGuiSpace.getSquare();
-                gameBoard.getChildren().add(newSquare);
-                guiBoard[destination.getX()][destination.getY()] = guiSpace;
-            }
-        }
-
-        // Recolor the bg of the destination
-        GUISpace guiSpace = guiBoard[selectedDestination.getX()][selectedDestination.getY()];
-        guiSpace.setBgColor(Color.LIMEGREEN);
-
-        // From all origins, path to the destination and take spaces
-        og.takeSpaces(player, otherPlayer(player), availableMoves, selectedDestination);
-        updateGUIBoardWithAnimation(player, availableMoves, selectedDestination);
-
-        // Redisplay the new board
-        clearBoard();
-        displayBoard();
-
-        // Next opponent turn
-        turnText(otherPlayer(player));
-        takeTurn(otherPlayer(player));
-
-        resetTimer();
-    }
-
-    /**
-     * Updates the GUI Board by adding or updating discs from all origins to a given destination
-     * @param player player that is taking a turn
-     * @param availableMoves the list of all available destinations and origins
-     * @param selectedDestination the selected destination from either user input or computer decision
-     */
-    @FXML
-    protected void updateGUIBoardWithAnimation(Player player,
-                                               Map<BoardSpace, List<BoardSpace>> availableMoves,
-                                               BoardSpace selectedDestination) {
-
-        GUISpace destinationSpace = guiBoard[selectedDestination.getX()][selectedDestination.getY()];
-        Circle disc = destinationSpace.getDisc();
-
-        if (disc != null) {
-            ScaleTransition placeAnim = new ScaleTransition(Duration.millis(200), disc);
-            placeAnim.setFromX(0.1);
-            placeAnim.setFromY(0.1);
-            placeAnim.setToX(1.0);
-            placeAnim.setToY(1.0);
-            placeAnim.play();
-        }
-
-
-        Timeline flipTimeline = new Timeline();
-        int delay = 0;
-
-        for (BoardSpace origin : availableMoves.get(selectedDestination)) {
-            List<BoardSpace> path = calculatePath(origin, selectedDestination);
-
-            for (BoardSpace space : path) {
-                GUISpace guiSpace = guiBoard[space.getX()][space.getY()];
-                Circle flipDisc = guiSpace.getDisc();
-
-                if (flipDisc != null) {
-                    KeyFrame flipFrame = new KeyFrame(
-                            Duration.millis(delay),
-                            e -> {
-                                RotateTransition rt = new RotateTransition(Duration.millis(150), flipDisc);
-                                rt.setFromAngle(0.0);
-                                rt.setToAngle(180.0);
-                                rt.setOnFinished(event -> guiSpace.addOrUpdateDisc(player.getColor()));
-                                rt.play();
-                            }
-                    );
-                    flipTimeline.getKeyFrames().add(flipFrame);
-                    delay += 100;
-                }
-            }
-        }
-
-        flipTimeline.setOnFinished(e -> {
-            clearBoard();
-            displayBoard();
-            resetTimer();
+        skippedTurns = 0;
+        moves.forEach((dest, origins) -> {
+            GUISpace gs = guiBoard[dest.getX()][dest.getY()];
+            Pane sq = gs.getSquare();
+            gs.setBgColor(Color.LIGHTYELLOW);
+            EventHandler<MouseEvent> enter = e -> gs.setBgColor(Color.LIME);
+            EventHandler<MouseEvent> exit  = e -> gs.setBgColor(Color.LIGHTYELLOW);
+            sq.addEventHandler(MouseEvent.MOUSE_ENTERED, enter);
+            sq.addEventHandler(MouseEvent.MOUSE_EXITED, exit);
+            sq.setOnMouseClicked(e -> selectSpace(player, moves, dest));
         });
-        flipTimeline.play();
     }
 
-    private List<BoardSpace> calculatePath(BoardSpace start, BoardSpace end) {
-        List<BoardSpace> path = new ArrayList<>();
-        int x1 = start.getX(), y1 = start.getY();
-        int x2 = end.getX(), y2 = end.getY();
-
-        int dx = Integer.compare(x2, x1);
-        int dy = Integer.compare(y2, y1);
-
-        int x = x1 + dx;
-        int y = y1 + dy;
-
-        while (x != x2 || y != y2) {
-            path.add(og.getBoard()[x][y]);
-            x += dx;
-            y += dy;
-        }
-
-        return path;
-    }
-
-    private void addFlipAnimation(Timeline timeline, int x, int y, BoardSpace.SpaceType type, int delay) {
-        KeyFrame keyFrame = new KeyFrame(
-                Duration.millis(delay),
-                e -> guiBoard[x][y].addOrUpdateDisc(type)
-        );
-        timeline.getKeyFrames().add(keyFrame);
-    }
-
-    /**
-     * Returns the other player given one of the player fields
-     */
     @FXML
-    protected Player otherPlayer(Player player) {
-        if (player == og.getPlayerOne()) {
-            return og.getPlayerTwo();
+    protected void computerDecision(ComputerPlayer player) {
+        Map<BoardSpace, List<BoardSpace>> moves = og.getAvailableMoves(player);
+        if (moves == null || moves.isEmpty()) {
+            handleNoMoves();
+            return;
+        }
+        skippedTurns = 0;
+        BoardSpace dest = og.computerDecision(player);
+        processMove(player, dest, moves);
+    }
+
+    private void handleNoMoves() {
+        skippedTurns++;
+        if (skippedTurns >= 2 || totalPieces() == 64) {
+            gameOver();
         } else {
-            return og.getPlayerOne();
+            turnLabel.setText("Skipped " + currentPlayer.getColor() + "!");
+            takeTurn(otherPlayer());
         }
     }
 
-    /**
-     * Ends the game.
-     */
+    @FXML
+    protected void selectSpace(Player player,
+                               Map<BoardSpace, List<BoardSpace>> moves,
+                               BoardSpace dest) {
+        processMove(player, dest, moves);
+    }
+
+    private void processMove(Player player,
+                             BoardSpace dest,
+                             Map<BoardSpace, List<BoardSpace>> moves) {
+        stopTurnTimer();
+        og.takeSpaces(player, otherPlayer(), moves, dest);
+        displayBoard();
+        initSpaces();
+        takeTurn(otherPlayer());
+    }
+
+    private void updateTurnText() {
+        int p1 = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size();
+        int p2 = og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size();
+        turnCircle.setFill(currentPlayer.getColor().fill());
+        turnLabel.setText(currentPlayer.getColor() + "'s Turn (" +
+                (currentPlayer instanceof HumanPlayer ? "Human" : "Computer") + ")\n" +
+                "B: " + p1 + " - W: " + p2);
+    }
+
     @FXML
     protected void gameOver() {
-        boolean p1Victory = false;
-        boolean tie = false;
-        if (og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() > og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size()) {
-            p1Victory = true;
-        } else if (og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() == og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size()) {
-            tie = true;
-        }
-        if (tie) {
-            turnLabel.setText("GAME OVER! Game Tied with scores: \n " +
-                    og.getPlayerOne().getColor() + ": " + og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + " - " +
-                    og.getPlayerTwo().getColor() + ": " + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size());
-        } else if (p1Victory) {
-            turnLabel.setText("GAME OVER! BLACK wins with scores: \n " +
-                    og.getPlayerOne().getColor() + ": " + og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + " - " +
-                    og.getPlayerTwo().getColor() + ": " + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size());
-        } else {
-            turnLabel.setText("GAME OVER! WHITE wins with scores: \n " +
-                    og.getPlayerOne().getColor() + ": " + og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() + " - " +
-                    og.getPlayerTwo().getColor() + ": " + og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size());
+        int p1 = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size();
+        int p2 = og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size();
+        String result = p1 == p2 ? "Tie!" : (p1 > p2 ? "Black wins!" : "White wins!");
+        turnLabel.setText("GAME OVER: " + result + " (" + p1 + "-" + p2 + ")");
+        stopTurnTimer();
+    }
+
+    private void startTurnTimer() {
+        stopTurnTimer();
+        timeRemaining = 30;
+        timerLabel.setText(String.valueOf(timeRemaining));
+        turnTimer = new Timeline(new KeyFrame(Duration.seconds(1), evt -> {
+            timeRemaining--;
+            timerLabel.setText(String.valueOf(timeRemaining));
+            if (timeRemaining <= 0) onTurnTimeout();
+        }));
+        turnTimer.setCycleCount(timeRemaining);
+        turnTimer.play();
+    }
+
+    private void stopTurnTimer() {
+        if (turnTimer != null) {
+            turnTimer.stop();
+            turnTimer = null;
         }
     }
 
-    @FXML
-    protected void computerDecision(ActionEvent event) {
-        if (og != null && og.getCurrentPlayer() instanceof ComputerPlayer) {
-            computerDecision((ComputerPlayer) og.getCurrentPlayer());
-        }
+    private void onTurnTimeout() {
+        turnLabel.setText("Time up for " + currentPlayer.getColor());
+        handleNoMoves();
     }
 
-    @FXML
-    protected void startGame(ActionEvent event) {
-        // 1. Hide the ready button
-        startButton.setVisible(false);
-
-        // 2. Enable board interaction
-        gameBoard.setDisable(false);
-
-        // 3. Show game start notification
-        turnLabel.setText("GAME STARTED!");
-
-        // 4. If human player goes first, start the timer
-        if (og.getCurrentPlayer() instanceof HumanPlayer) {
-            gameTimer.playFromStart();
-        }
-
-        // 5. Begin the first turn
-        takeTurn(og.getCurrentPlayer());
-
-        // 6. Add visual feedback
-        FadeTransition ft = new FadeTransition(Duration.seconds(1), turnLabel);
-        ft.setFromValue(1.0);
-        ft.setToValue(0.3);
-        ft.setCycleCount(2);
-        ft.setAutoReverse(true);
-        ft.play();
+    private int totalPieces() {
+        return og.getPlayerOne().getPlayerOwnedSpacesSpaces().size() +
+                og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size();
     }
 
+    private Player otherPlayer() {
+        return currentPlayer == og.getPlayerOne() ? og.getPlayerTwo() : og.getPlayerOne();
+    }
 }

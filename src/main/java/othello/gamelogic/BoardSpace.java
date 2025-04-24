@@ -1,9 +1,8 @@
 package othello.gamelogic;
-
+import java.util.Objects;
 import javafx.scene.paint.Color;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Represents a logical space on the Othello Board.
@@ -114,7 +113,7 @@ public class BoardSpace {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(x, y);
     }
+
 }
