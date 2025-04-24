@@ -245,48 +245,23 @@ public class GameController  {
      * @param availableMoves the available moves gotten from showMoves earlier
      * @param selectedDestination the selected destination space that was clicked on
      */
-    @FXML
+    @FXML// 正确的 selectSpace 方法结构
     protected void selectSpace(Player player, Map<BoardSpace, List<BoardSpace>> availableMoves, BoardSpace selectedDestination) {
-        // Remove other handlers by reinitializing empty spaces where they are
-        for (BoardSpace destination : availableMoves.keySet()) {
-            GUISpace guiSpace = guiBoard[destination.getX()][destination.getY()];
-            if (destination != selectedDestination) {
-                // Reinit unselected spaces, to remove event handlers
-                og.getBoard()[destination.getX()][destination.getY()] =
-                        new BoardSpace(destination.getX(), destination.getY(), BoardSpace.SpaceType.EMPTY);
-                gameBoard.getChildren().remove(guiSpace.getSquare());
-                GUISpace newGuiSpace = new GUISpace(destination.getX(), destination.getY(), BoardSpace.SpaceType.EMPTY);
-                Pane newSquare = newGuiSpace.getSquare();
-                gameBoard.getChildren().add(newSquare);
-                guiBoard[destination.getX()][destination.getY()] = guiSpace;
-            } else {
-                og.getBoard()[destination.getX()][destination.getY()] =
-                        new BoardSpace(destination.getX(), destination.getY(), player.getColor());
-                gameBoard.getChildren().remove(guiSpace.getSquare());
-                GUISpace newGuiSpace = new GUISpace(destination.getX(), destination.getY(), player.getColor());
-                Pane newSquare = newGuiSpace.getSquare();
-                gameBoard.getChildren().add(newSquare);
-                guiBoard[destination.getX()][destination.getY()] = guiSpace;
-            }
-        }
+        // 1. 清理之前的 GUI 效果（比如高亮、事件处理器）
+        // clearGUIMoveHandlers(); // 你需要实现或确保这个功能正确
 
-        // Recolor the bg of the destination
-        GUISpace guiSpace = guiBoard[selectedDestination.getX()][selectedDestination.getY()];
-        guiSpace.setBgColor(Color.LIMEGREEN);
-
-        // From all origins, path to the destination and take spaces
+        // 2. 调用 OthelloGame 中的方法来更新游戏逻辑状态
+        //    这是唯一应该修改 og.getBoard() 和 playerOwnedSpaces 的地方
         og.takeSpaces(player, otherPlayer(player), availableMoves, selectedDestination);
-        updateGUIBoard(player, availableMoves, selectedDestination);
 
-        // Redisplay the new board
-        clearBoard();
-        displayBoard();
+        // 3. 根据更新后的 OthelloGame 状态刷新整个 GUI 显示
+        // clearBoard(); // 可能被 displayBoard 包含
+        displayBoard(); // 重绘棋盘
 
-        // Next opponent turn
+        // 4. 轮到下一个玩家
         turnText(otherPlayer(player));
         takeTurn(otherPlayer(player));
     }
-
     /**
      * Updates the GUI Board by adding or updating discs from all origins to a given destination
      * @param player player that is taking a turn
