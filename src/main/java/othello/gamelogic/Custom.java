@@ -2,7 +2,7 @@ package othello.gamelogic;
 
 public class Custom implements AI {
     @Override
-    public BoardSpace nextMove(BoardSpace boardSpace) {
+    public BoardSpace nextMove(BoardSpace[][] boardSpace, Player player) {
         // TODO: Algorithm TBD
         // alternative: 1. Heuristic-Based Weighted Evaluation
         //

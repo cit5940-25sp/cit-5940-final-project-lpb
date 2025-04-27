@@ -1,5 +1,5 @@
 package othello.gamelogic;
 
 public interface AI {
-    public BoardSpace nextMove(BoardSpace boardSpace);
+    BoardSpace nextMove(BoardSpace[][] board, Player player);
 }
