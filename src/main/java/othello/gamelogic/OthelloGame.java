@@ -17,17 +17,31 @@ public class OthelloGame {
         this.playerOne = playerOne;
         this.playerTwo = playerTwo;
         initBoard();
+        // Set up initial board configuration
+        board[3][3] = BoardSpace.getBoardSpace(3, 3, BoardSpace.SpaceType.WHITE);
+        board[3][4] = BoardSpace.getBoardSpace(3, 4, BoardSpace.SpaceType.BLACK);
+        board[4][3] = BoardSpace.getBoardSpace(4, 3, BoardSpace.SpaceType.BLACK);
+        board[4][4] = BoardSpace.getBoardSpace(4, 4, BoardSpace.SpaceType.WHITE);
+
+        // Initialize player owned spaces
+        playerOne.addOwnedSpace(board[3][4]);
+        playerOne.addOwnedSpace(board[4][3]);
+        playerTwo.addOwnedSpace(board[3][3]);
+        playerTwo.addOwnedSpace(board[4][4]);
     }
 
     public BoardSpace[][] getBoard() {
+
         return board;
     }
 
     public Player getPlayerOne() {
+
         return playerOne;
     }
 
     public Player getPlayerTwo() {
+
         return  playerTwo;
     }
 
@@ -48,7 +62,8 @@ public class OthelloGame {
         board = new BoardSpace[GAME_BOARD_SIZE][GAME_BOARD_SIZE];
         for (int i = 0; i < GAME_BOARD_SIZE; i++) {
             for (int j = 0; j < GAME_BOARD_SIZE; j++) {
-                board[i][j] = new BoardSpace(i, j, BoardSpace.SpaceType.EMPTY);
+                // Use Flyweight factory to get shared instances
+                board[i][j] = BoardSpace.getBoardSpace(i, j, BoardSpace.SpaceType.EMPTY);
             }
         }
     }
@@ -64,7 +79,41 @@ public class OthelloGame {
      * @param x the x-coordinate of the space to claim
      * @param y the y-coordinate of the space to claim
      */
-    public void takeSpace(Player actingPlayer, Player opponent, int x, int y) {}
+    public void takeSpace(Player actingPlayer, Player opponent, int x, int y) {
+
+        BoardSpace space = board[x][y]; // Get current state of the space
+
+        // Safety checks
+        if (actingPlayer == null || opponent == null || space == null) {
+            System.err.println("ERROR in takeSpace: Null player or space object provided for (" + x + "," + y + ")");
+            return;
+        }
+
+        // --- Original DEBUG ---
+        // System.out.println("--- Starting takeSpace(" + x + "," + y + ") for " + actingPlayer.getColor() + " ---");
+        // int initialActingPlayerSize = actingPlayer.getPlayerOwnedSpacesSpaces().size(); // Record initial size
+
+        // Only process if the space is empty or belongs to opponent
+        if (space.getType() != actingPlayer.getColor()) {
+            // Remove from opponent if it was their space
+            if (space.getType() == opponent.getColor()) {
+                opponent.removeOwnedSpace(space);
+            }
+
+            // Get the flyweight instance for the new state (acting player's color)
+            BoardSpace newSpace = BoardSpace.getBoardSpace(x, y, actingPlayer.getColor());
+            // Update the board to point to this instance
+            board[x][y] = newSpace;
+
+            // Add the new instance to the acting player's owned list
+            actingPlayer.addOwnedSpace(newSpace); // This calls the method in Player.java
+
+        } else {
+            // Code here executes if the space *already* belongs to the acting player
+            System.out.println(">>> takeSpace: Condition FALSE (space type " + space.getType() + " == player color " + actingPlayer.getColor() + "). Skipping add/remove."); // DEBUG
+        }
+    }
+
 
     /**
      * PART 1
@@ -76,7 +125,84 @@ public class OthelloGame {
      * @param availableMoves map of the available moves, that maps destination to list of origins
      * @param selectedDestination the specific destination that a HUMAN player selected
      */
-    public void takeSpaces(Player actingPlayer, Player opponent, Map<BoardSpace, List<BoardSpace>> availableMoves, BoardSpace selectedDestination) {}
+    public void takeSpaces(Player actingPlayer, Player opponent,
+                           Map<BoardSpace, List<BoardSpace>> availableMoves, BoardSpace selectedDestination) {
+
+        // --- DEBUG: Log info just before calling takeSpace ---
+        if (selectedDestination != null) {
+            int destX = selectedDestination.getX();
+            int destY = selectedDestination.getY();
+            BoardSpace.SpaceType currentTypeOnBoard = BoardSpace.SpaceType.EMPTY; // Default assumption
+            if (destX >= 0 && destX < GAME_BOARD_SIZE && destY >= 0 && destY < GAME_BOARD_SIZE && board[destX][destY] != null) {
+                currentTypeOnBoard = board[destX][destY].getType();
+            } else {
+                System.err.println("!!! takeSpaces: Invalid coordinates or null board space for selectedDestination (" + destX + "," + destY + ")");
+            }
+        } else {
+            System.err.println("!!! takeSpaces: selectedDestination is NULL!");
+            return; // Cannot proceed if destination is null
+        }
+        // --- End DEBUG ---
+
+        // First take the destination space
+        takeSpace(actingPlayer, opponent, selectedDestination.getX(), selectedDestination.getY());
+
+        // Get all origin spaces that lead to this destination
+        List<BoardSpace> origins = availableMoves.get(selectedDestination);
+        if (origins != null) {
+            for (BoardSpace origin : origins) {
+                if (origin == null) { // Safety check
+                    System.err.println("!!! takeSpaces: Found null origin in list for destination (" + selectedDestination.getX() + "," + selectedDestination.getY() + ")");
+                    continue;
+                }
+                // Flip all pieces between origin and destination
+                flipPiecesBetween(origin, selectedDestination, actingPlayer, opponent);
+            }
+        } else {
+            // This might happen if availableMoves map is inconsistent, log it.
+            System.err.println("!!! takeSpaces: No origins found in availableMoves map for selectedDestination (" + selectedDestination.getX() + "," + selectedDestination.getY() + ")");
+        }
+    }
+    /**
+     * Helper method to flip all pieces between two spaces
+     */
+    private void flipPiecesBetween(BoardSpace start, BoardSpace end,
+                                   Player actingPlayer, Player opponent) {
+        int x1 = start.getX();
+        int y1 = start.getY();
+        int x2 = end.getX();
+        int y2 = end.getY();
+
+        int dx = Integer.compare(x2, x1);
+        int dy = Integer.compare(y2, y1);
+
+        int x = x1 + dx;
+        int y = y1 + dy;
+
+        // Move along the line between start and end
+        while (x != x2 || y != y2) {
+            BoardSpace current = board[x][y];
+
+            BoardSpace currentOriginal = board[x][y];
+
+            if (currentOriginal.getType() == opponent.getColor()) {
+                // Get the flyweight instance for the new state
+                BoardSpace currentNew = BoardSpace.getBoardSpace(x, y, actingPlayer.getColor());
+                // Update the board reference
+                board[x][y] = currentNew;
+
+                // Update ownership lists
+                opponent.removeOwnedSpace(currentOriginal);
+                actingPlayer.addOwnedSpace(currentNew);
+            } else {
+                System.err.println("Warning: Unexpected piece type at (" + x + "," + y + ") in flipPiecesBetween.");
+                break;
+            }
+
+            x += dx;
+            y += dy;
+        }
+    }
 
     /**
      * PART 2
@@ -87,7 +213,8 @@ public class OthelloGame {
      * @return the BoardSpace that was decided upon
      */
     public BoardSpace computerDecision(ComputerPlayer computer) {
-        return null;
+
+        return computer.makeMove(board);
     }
 
 }

@@ -1,0 +1,199 @@
+/* Dynamic timer styles */
+.dynamic-timer {
+    -fx-font-family: 'Digital', monospace;
+    -fx-font-size: 24px;
+    -fx-text-fill: #4CAF50;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0.5, 0, 1);
+}
+
+.dynamic-timer.urgent {
+    -fx-text-fill: #FF5252;
+    -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.3), 3, 0.7, 0, 1);
+}
+
+/* Status card styles */
+.status-card {
+    -fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
+    -fx-background-radius: 10;
+    -fx-padding: 10 15;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+
+/* Score display styles */
+.score-display {
+    -fx-font-size: 18px;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+}
+
+/* Right panel base styles */
+.right-panel {
+    -fx-background-color: linear-gradient(to bottom, #2c3e50, #4ca1af);
+    -fx-border-color: rgba(255,255,255,0.1);
+    -fx-border-width: 0 0 0 1px;
+    -fx-padding: 25px;
+    -fx-alignment: CENTER;
+}
+
+/* Control panel background */
+.control-panel {
+    -fx-background-color: linear-gradient(to bottom, #2c3e50, #4ca1af);
+    -fx-padding: 25px; /* 增加内边距 */
+    -fx-min-width: 350px; /* 最小宽度保障 */
+    -fx-pref-width: 350px; /* 首选宽度 */
+    -fx-border-color: rgba(255,255,255,0.2);
+    -fx-border-width: 0 0 0 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
+}
+
+
+.board-container {
+    -fx-background-color: white;
+    -fx-alignment: center; /* 关键居中属性 */
+    -fx-padding: 20;
+    -fx-pref-width: 480px; /* 固定宽度 */
+}
+
+.game-board {
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);
+}
+
+
+
+.section-title {
+    -fx-text-fill: rgba(255,255,255,0.8);
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 1);
+}
+
+
+.status-card {
+    -fx-background-color: rgba(0,0,0,0.25);
+    -fx-background-radius: 15;
+    -fx-padding: 15px 25px;
+    -fx-border-color: rgba(255,255,255,0.15);
+    -fx-border-radius: 15;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 0);
+}
+
+.turn-indicator {
+    -fx-stroke: white;
+    -fx-stroke-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 0, 0);
+    -fx-margin-bottom: 10px; /* 增加与下方元素的间距 */
+}
+
+.status-text {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold; /* 显式加粗 */
+    -fx-text-fill: white;  /* 深色提升可读性 */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0.5, 0, 1);
+}
+.score-display {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #000000;
+}
+
+.timer-section {
+    -fx-padding: 10px 0;
+}
+
+
+.timer-container {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 15;
+    -fx-padding: 15px 25px;
+    -fx-border-color: rgba(255,255,255,0.1);
+    -fx-border-radius: 15;
+    -fx-border-width: 1px;
+}
+
+.timer-icon {
+    -fx-font-size: 28px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0.5, 0, 1);
+}
+
+.timer-countdown {
+    -fx-font-size: 42px;
+    -fx-text-fill: #4CAF50;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0;
+}
+
+.timer-countdown.urgent {
+    -fx-text-fill: #FF5252;
+    -fx-effect: innershadow(gaussian, rgba(255,0,0,0.8), 5, 0.5, 0, 0);
+}
+
+
+.score-panel {
+    -fx-padding: 15px;
+    -fx-background-color: rgba(0,0,0,0.2);
+    -fx-background-radius: 10;
+}
+
+.score-title {
+    -fx-text-fill: rgba(255,255,255,0.8);
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.score-display {
+    -fx-font-size: 20px; /* 原为24px */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+
+.action-button {
+    -fx-pref-width: 220px;
+    -fx-alignment: CENTER;
+}
+
+
+.action-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 1);
+    -fx-min-width: 200px;
+    -fx-max-width: Infinity;
+}
+
+.action-button:hover {
+    -fx-background-color: #2980b9;
+    -fx-cursor: hand;
+}
+
+.indicator-container {
+    -fx-padding: 0 0 10 0;
+}
+
+.status-section {
+    -fx-padding: 0 0 10px 0;
+}
+.timer-section {
+    -fx-padding: 10px 0;
+}
+.score-section {
+    -fx-padding: 10px 0;
+}
+.start-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+}
+.start-button:hover {
+    -fx-background-color: #45a049;
+}
