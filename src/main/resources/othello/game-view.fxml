@@ -4,42 +4,60 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="othello.gui.GameController">
+<BorderPane prefHeight="600.0" prefWidth="960.0"
+            xmlns="http://javafx.com/javafx/17.0.2-ea"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="othello.gui.GameController">
+
+   <!-- ===== 左侧：棋盘（居中） ===== -->
    <left>
-      <BorderPane prefHeight="600.0" prefWidth="650.0" BorderPane.alignment="CENTER">
-         <center>
-            <Pane fx:id="gameBoard" maxHeight="480.0" maxWidth="480.0" prefHeight="480.0" prefWidth="480.0" BorderPane.alignment="CENTER">
-               <children>
-                  <Pane prefHeight="200.0" prefWidth="61.0" />
-               </children>
-            </Pane>
-         </center>
-      </BorderPane>
+      <StackPane alignment="CENTER" prefWidth="650.0">
+         <Pane fx:id="gameBoard"
+               prefHeight="480.0" prefWidth="480.0"
+               style="-fx-border-color: darkgrey; -fx-border-width: 1;"/>
+      </StackPane>
    </left>
+
+   <!-- ===== 右侧：控制面板 + 计时器 ===== -->
    <right>
-      <Pane prefHeight="600.0" prefWidth="310.0" style="-fx-background-color: limegreen; -fx-border-color: black; -fx-border-width: 0 0 0 2;" BorderPane.alignment="CENTER">
-         <children>
-            <BorderPane prefHeight="600.0" prefWidth="310.0">
-               <center>
-                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="8.0" BorderPane.alignment="CENTER">
-                     <children>
-                        <Circle fx:id="turnCircle" fill="DODGERBLUE" radius="30.0" stroke="BLACK" strokeType="INSIDE" />
-                        <Label fx:id="turnLabel" contentDisplay="CENTER" text="Turn" textAlignment="CENTER" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="24.0" />
-                           </font>
-                        </Label>
-                        <Button fx:id="computerTurnBtn" mnemonicParsing="false" text="Take Computer Turn">
-                           <font>
-                              <Font size="16.0" />
-                           </font>
-                        </Button>
-                     </children>
-                  </VBox>
-               </center>
-            </BorderPane>
-         </children>
+      <Pane prefHeight="600.0" prefWidth="310.0"
+            style="-fx-background-color: linear-gradient(to bottom, #28475b, #3e7f9a);
+                     -fx-border-color: black; -fx-border-width: 0 0 0 2;">
+
+         <BorderPane prefHeight="600.0" prefWidth="310.0">
+            <center>
+               <VBox alignment="CENTER" spacing="8.0">
+                  <padding>
+                     <Insets top="20" right="20" bottom="20" left="20"/>
+                  </padding>
+
+                  <!-- 当前回合显示 -->
+                  <Circle fx:id="turnCircle" radius="30.0"
+                          stroke="BLACK" strokeType="INSIDE"/>
+
+                  <Label fx:id="turnLabel" text="Turn" textFill="WHITE">
+                     <font><Font name="System Bold" size="24.0"/></font>
+                  </Label>
+
+                  <!-- 电脑落子按钮 -->
+                  <Button fx:id="computerTurnBtn" text="Take Computer Turn">
+                     <font><Font size="16.0"/></font>
+                  </Button>
+
+                  <!-- 计时器 -->
+                  <Label text="TIME REMAINING" textFill="WHITE">
+                     <font><Font size="16.0"/></font>
+                  </Label>
+
+                  <Label fx:id="timerLabel" text="30" textFill="LIMEGREEN">
+                     <font><Font name="System Bold" size="36.0"/></font>
+                  </Label>
+               </VBox>
+            </center>
+         </BorderPane>
       </Pane>
    </right>
+
 </BorderPane>

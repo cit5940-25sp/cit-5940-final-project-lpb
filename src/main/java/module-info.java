@@ -1,6 +1,7 @@
 module othello {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.desktop;
 
 
     opens othello to javafx.fxml;
