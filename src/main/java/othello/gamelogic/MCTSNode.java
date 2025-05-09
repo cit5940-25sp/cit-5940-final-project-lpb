@@ -168,6 +168,12 @@ public class MCTSNode {
         }
     }
 
+    /**
+     * PART 5
+     * Determines the best move based on the win rate of child nodes.
+     * Selects the child node with the highest win rate after all simulations.
+     * @return The BoardSpace representing the best move, or null if no children exist
+     */
     public BoardSpace getBestMove() {
         MCTSNode bestChild = null;
         double bestWinRate = -1;
@@ -183,6 +189,13 @@ public class MCTSNode {
         return bestChild != null ? bestChild.move : null;
     }
 
+    /**
+     * PART 6
+     * Creates a deep copy of the game board.
+     * Uses the BoardSpace flyweight pattern to maintain memory efficiency.
+     * @param board The board to copy
+     * @return A new board with the same state as the input board
+     */
     public BoardSpace[][] copyBoard(BoardSpace[][] board) {
         BoardSpace[][] newBoard = new BoardSpace[board.length][board[0].length];
         for (int i = 0; i < board.length; i++) {
@@ -193,6 +206,16 @@ public class MCTSNode {
         return newBoard;
     }
 
+    /**
+     * PART 7
+     * Executes a move on the board and updates player ownership.
+     * Places a piece at the specified location and flips all captured pieces.
+     * @param board The game board to modify
+     * @param move The move to execute
+     * @param flips The list of pieces to flip
+     * @param current The player making the move
+     * @param opponent The opposing player
+     */
     public void executeMove(BoardSpace[][] board, BoardSpace move, List<BoardSpace> flips,
                      Player current, Player opponent) {
         board[move.getX()][move.getY()] = BoardSpace.getBoardSpace(
@@ -203,6 +226,17 @@ public class MCTSNode {
         }
     }
 
+    /**
+     * PART 8
+     * Flips all pieces between two positions on the board.
+     * Updates player ownership of the flipped pieces.
+     * Uses the BoardSpace flyweight pattern for piece updates.
+     * @param start The starting position
+     * @param end The ending position
+     * @param board The game board to modify
+     * @param current The player gaining ownership
+     * @param opponent The player losing ownership
+     */
     private void flipPiecesBetween(BoardSpace start, BoardSpace end, BoardSpace[][] board,
                                    Player current, Player opponent) {
         int x1 = start.getX();
