@@ -16,10 +16,19 @@ import othello.gui.GameController;
  */
 public class App extends javafx.application.Application {
 
-    // The program arguments MUST match one of these items!
-    // Edit this list to add more items!
+    /**
+     * A list of accepted command-line arguments for player types.
+     * These correspond to different player implementations (e.g., human or AI).
+     */
     private final List<String> acceptedArgs = List.of("human", "minimax", "expectimax", "mcts", "custom");
 
+    /**
+     * The main entry point for JavaFX applications. Loads the game view and initializes the controller
+     * with user-specified player types.
+     *
+     * @param stage the primary stage for this application, onto which the scene is set
+     * @throws IOException if the FXML file cannot be loaded
+     */
     @Override
     public void start(Stage stage) throws IOException {
         Parameters params = getParameters();
@@ -43,6 +52,11 @@ public class App extends javafx.application.Application {
         stage.show();
     }
 
+    /**
+     * Launches the JavaFX Othello application.
+     *
+     * @param args the command-line arguments specifying the two player types (e.g., "human" "mcts")
+     */
     public static void main(String[] args) {
         launch(args);
     }

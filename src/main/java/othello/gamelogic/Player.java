@@ -10,23 +10,40 @@ import java.util.Objects; // Ensure Objects is imported for hashCode
  * Abstract Player class for representing a player within the game.
  * All types of Players have a color and a set of owned spaces on the game board.
  */
-public abstract class Player {
-    // Use final for the list to prevent reassignment, though its contents are mutable
+public class Player {
+    /** List of board spaces currently owned by this player. */
     private final List<BoardSpace> playerOwnedSpaces = new ArrayList<>();
-
+    /** The color associated with this player. */
     private BoardSpace.SpaceType color;
 
+    /**
+     * Returns the list of spaces currently owned by the player.
+     *
+     * @return a list of {@link BoardSpace} instances owned by the player.
+     */
     public List<BoardSpace> getPlayerOwnedSpacesSpaces() {
         return playerOwnedSpaces;
     }
 
+    /**
+     * Sets the color for this player.
+     *
+     * @param color the {@link BoardSpace.SpaceType} representing this player's color.
+     */
     public void setColor(BoardSpace.SpaceType color) {
         this.color = color;
     }
 
+    /**
+     * Returns the color associated with this player.
+     *
+     * @return this player's {@link BoardSpace.SpaceType}.
+     */
     public BoardSpace.SpaceType getColor() {
         return color;
     }
+
+
 
     /**
      * VALIDATION METHOD: Counts pieces of this player's color directly from the board.

@@ -12,15 +12,34 @@ import othello.gamelogic.BoardSpace;
  * Includes a Pane that hosts a Rectangle for a background and a Circle for the colored disc.
  */
 public class GUISpace {
+    /** The width and height of each board square in pixels. */
     public static final int SQUARE_SIZE = 60;
 
+    /** The main Pane representing this space on the board. */
     private Pane squarePane;
+
+    /** The green background rectangle inside the Pane. */
     private Rectangle bg;
+
+    /** The black or white disc displayed inside the Pane, if present. */
     private Circle disc;
+
+    /** The current logical type (black, white, or empty) associated with this space. */
     private BoardSpace.SpaceType type;
+
+    /** The x-coordinate (column) of this board space. */
     private final int x;
+
+    /** The y-coordinate (row) of this board space. */
     private final int y;
 
+    /**
+     * Constructs a new GUISpace at the given coordinates and initializes it with a space type.
+     *
+     * @param x the x (column) coordinate on the board
+     * @param y the y (row) coordinate on the board
+     * @param type the type of space to initialize (BLACK, WHITE, or EMPTY)
+     */
     public GUISpace(int x, int y, BoardSpace.SpaceType type) {
         this.x = x;
         this.y = y;

@@ -8,11 +8,23 @@ public class ComputerPlayer extends Player{
     private AI strategy;
     private String strategyName;
 
+    /**
+     * Constructs a ComputerPlayer using a given strategy name.
+     * Initializes the AI strategy accordingly.
+     *
+     * @param strategyName the name of the strategy to use ("minimax", "mcts", or "custom")
+     * @throws IllegalArgumentException if the strategy name is not recognized
+     */
     public ComputerPlayer(String strategyName) {
         this.strategyName = strategyName;
         this.strategy = createStrategy(strategyName);
     }
 
+    /**
+     * Returns the name of the strategy used by this computer player.
+     *
+     * @return the strategy name
+     */
     public String getStrategyName() {
         return strategyName;
     }
