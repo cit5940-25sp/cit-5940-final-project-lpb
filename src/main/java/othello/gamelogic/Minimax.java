@@ -33,7 +33,6 @@ public class Minimax implements AI {
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
 
-
         for (Map.Entry<BoardSpace, List<BoardSpace>> entry : moves.entrySet()) {
             BoardSpace[][] copy = copyBoard(board);
             Player playerCopy = player.copy();
@@ -107,7 +106,7 @@ public class Minimax implements AI {
         return bestScore;
     }
 
-    int evaluateBoard(BoardSpace[][] board, Player player, Player opponent) {
+    private int evaluateBoard(BoardSpace[][] board, Player player, Player opponent) {
         int score = 0;
 
         for (int i = 0; i < board.length; i++) {
@@ -120,15 +119,10 @@ public class Minimax implements AI {
             }
         }
 
-        // Calculate Mobility Score
-        int playerMobility = player.getAvailableMoves(board).size();
-        int opponentMobility = opponent.getAvailableMoves(board).size();
-        score += (playerMobility - opponentMobility) * 10;
-
         return score;
     }
 
-    BoardSpace[][] copyBoard(BoardSpace[][] board) {
+    private BoardSpace[][] copyBoard(BoardSpace[][] board) {
         BoardSpace[][] copy = new BoardSpace[board.length][board[0].length];
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
@@ -138,7 +132,7 @@ public class Minimax implements AI {
         return copy;
     }
 
-    void executeMove(BoardSpace[][] board, BoardSpace move, List<BoardSpace> moves,
+    private void executeMove(BoardSpace[][] board, BoardSpace move, List<BoardSpace> moves,
                      Player player, Player opponent) {
         board[move.getX()][move.getY()] = BoardSpace.getBoardSpace(
                 move.getX(), move.getY(), player.getColor());
@@ -158,8 +152,8 @@ public class Minimax implements AI {
         int dx = Integer.compare(x2, x1);
         int dy = Integer.compare(y2, y1);
 
-        int x = x1;
-        int y = y1;
+        int x = x1 + dx;
+        int y = y1 + dy;
 
         // Move along the line between start and end
         while (x != x2 || y != y2) {

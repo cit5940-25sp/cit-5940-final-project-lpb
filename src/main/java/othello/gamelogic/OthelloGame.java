@@ -210,5 +210,4 @@ public class OthelloGame {
 
         return computer.makeMove(board, playerOne == computer ? playerTwo : playerOne);
     }
-
 }

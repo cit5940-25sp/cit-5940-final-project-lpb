@@ -164,6 +164,7 @@ public class MCTSNode {
                      Player current, Player opponent) {
         board[move.getX()][move.getY()] = BoardSpace.getBoardSpace(
                 move.getX(), move.getY(), current.getColor());
+        current.addOwnedSpace(board[move.getX()][move.getY()]);
         for (BoardSpace dest : flips) {
             flipPiecesBetween(move, dest, board, current, opponent);
         }
@@ -179,8 +180,8 @@ public class MCTSNode {
         int dx = Integer.compare(x2, x1);
         int dy = Integer.compare(y2, y1);
 
-        int x = x1;
-        int y = y1;
+        int x = x1 + dx;
+        int y = y1 + dy;
 
         // Move along the line between start and end
         while (x != x2 || y != y2) {
