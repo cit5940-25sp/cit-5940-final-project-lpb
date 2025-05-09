@@ -7,12 +7,21 @@ import java.util.List;
 import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test class for the Custom AI implementation.
+ * Tests various aspects of the Custom AI algorithm including move selection,
+ * board evaluation, and game state handling.
+ */
 public class CustomTest {
     private Custom custom;
     private Player blackPlayer;
     private Player whitePlayer;
     private BoardSpace[][] board;
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes the board, players, and Custom AI instance.
+     */
     @BeforeEach
     void setUp() {
         custom = new Custom();
@@ -39,6 +48,12 @@ public class CustomTest {
         whitePlayer.addOwnedSpace(board[4][4]);
     }
 
+    /**
+     * PART 1
+     * Tests the initial move selection of the Custom AI.
+     * Verifies that the algorithm can make a valid move from the starting position
+     * and that the move is in a valid position on the board.
+     */
     @Test
     void testInitialMove() {
         BoardSpace move = custom.nextMove(board, blackPlayer, whitePlayer);
@@ -50,6 +65,12 @@ public class CustomTest {
         assertTrue(availableMoves.containsKey(move));
     }
 
+    /**
+     * PART 2
+     * Tests the behavior when no valid moves are available.
+     * Verifies that the algorithm correctly returns null when there are no legal moves
+     * for the current player.
+     */
     @Test
     void testNoAvailableMoves() {
         // Create a board state with no valid moves
@@ -62,6 +83,12 @@ public class CustomTest {
         assertNull(move);
     }
 
+    /**
+     * PART 3
+     * Tests the depth setting functionality of the Custom AI.
+     * Verifies that valid depth values are accepted and invalid values (0 or negative)
+     * throw appropriate exceptions.
+     */
     @Test
     void testDepthSetting() {
         // Test setting the search depth
@@ -72,6 +99,12 @@ public class CustomTest {
         assertThrows(IllegalArgumentException.class, () -> custom.setDepth(-1));
     }
 
+    /**
+     * PART 4
+     * Tests the consistency of move selection.
+     * Verifies that multiple calls to nextMove() return the same move for the same board state,
+     * as the Negamax algorithm is deterministic.
+     */
     @Test
     void testMoveConsistency() {
         // Test calling nextMove multiple times
@@ -86,6 +119,12 @@ public class CustomTest {
         assertTrue(availableMoves.containsKey(move1));
     }
 
+    /**
+     * PART 5
+     * Tests the execution of a move selected by the Custom AI.
+     * Verifies that the selected move can be properly executed on the board
+     * and that the board state is correctly updated.
+     */
     @Test
     void testMoveExecution() {
         BoardSpace move = custom.nextMove(board, blackPlayer, whitePlayer);
@@ -103,6 +142,12 @@ public class CustomTest {
         assertTrue(blackPlayer.getPlayerOwnedSpacesSpaces().contains(board[move.getX()][move.getY()]));
     }
 
+    /**
+     * PART 6
+     * Tests the algorithm's preference for corner moves.
+     * Verifies that when a corner move is available, the algorithm will select it
+     * as corners are strategically valuable in Othello.
+     */
     @Test
     void testCornerMovePreference() {
         blackPlayer.getPlayerOwnedSpacesSpaces().clear();
@@ -141,6 +186,12 @@ public class CustomTest {
         assertEquals(0, move.getY());
     }
 
+    /**
+     * PART 7
+     * Tests the algorithm's decision-making in different board states.
+     * Verifies that the algorithm can identify and select the best move
+     * in a situation where one player has a clear advantage.
+     */
     @Test
     void testDifferentBoardStates() {
         // Create a board state where the black player has an advantage
@@ -180,6 +231,12 @@ public class CustomTest {
         assertEquals(4, flips.get(0).getY());
     }
 
+    /**
+     * PART 8
+     * Tests the Alpha-Beta pruning optimization in the Negamax algorithm.
+     * Verifies that the algorithm can make correct decisions while using pruning
+     * to improve search efficiency.
+     */
     @Test
     void testAlphaBetaPruning() {
         // Create a board state that can trigger Alpha-Beta pruning
@@ -199,6 +256,12 @@ public class CustomTest {
         assertTrue(availableMoves.containsKey(move));
     }
 
+    /**
+     * PART 9
+     * Tests the evaluation function in various board positions.
+     * Verifies that the algorithm correctly evaluates different board states,
+     * including corner advantages, edge disadvantages, and internal positions.
+     */
     @Test
     void testEvaluationFunction() {
         // Test the evaluation function in different board states
@@ -224,6 +287,12 @@ public class CustomTest {
         assertTrue(availableMoves.containsKey(move));
     }
 
+    /**
+     * PART 10
+     * Tests the algorithm's behavior in end-game situations.
+     * Verifies that the algorithm can make appropriate decisions
+     * when the game is near completion.
+     */
     @Test
     void testEndGameState() {
         // Create a board state that is near the end of the game
@@ -251,6 +320,12 @@ public class CustomTest {
         assertTrue(availableMoves.isEmpty());
     }
 
+    /**
+     * PART 11
+     * Tests the handling of situations where a player must pass their turn.
+     * Verifies that the algorithm correctly returns null when the current player
+     * has no valid moves available.
+     */
     @Test
     void testPassTurn() {
         // Create a board state that requires skipping a turn

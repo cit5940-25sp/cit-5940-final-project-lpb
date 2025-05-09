@@ -3,13 +3,27 @@ package othello.gamelogic;
 import java.util.*;
 import static othello.Constants.BOARD_WEIGHTS;
 
+/**
+ * Minimax algorithm implementation for Othello game.
+ * Uses Alpha-Beta pruning to optimize the search process.
+ * Implements a weighted board evaluation strategy based on position values.
+ */
 public class Minimax implements AI {
     private int maxDepth; // search depth
 
+    /**
+     * Creates a new Minimax instance with default search depth.
+     * Default depth is set to 2 for balanced performance.
+     */
     public Minimax() {
         this.maxDepth = 2; // default depth
     }
 
+    /**
+     * Sets the maximum search depth for the Minimax algorithm.
+     * @param depth The desired search depth, must be greater than 0
+     * @throws IllegalArgumentException if depth is less than 1
+     */
     public void setMaxDepth(int depth) {
         if (depth < 1) {
             throw new IllegalArgumentException("invalid search depth");
@@ -17,10 +31,23 @@ public class Minimax implements AI {
         this.maxDepth = depth;
     }
 
+    /**
+     * Gets the current maximum search depth.
+     * @return The maximum search depth used in the Minimax algorithm
+     */
     public int getMaxDepth() {
         return maxDepth;
     }
 
+    /**
+     * PART 1
+     * Determines the next move using the Minimax algorithm with Alpha-Beta pruning.
+     * Evaluates all possible moves and selects the one with the highest score.
+     * @param board The current game board state
+     * @param player The current player making the move
+     * @param opponent The opposing player
+     * @return The selected BoardSpace to move to, or null if no valid moves exist
+     */
     @Override
     public BoardSpace nextMove(BoardSpace[][] board, Player player, Player opponent) {
         Map<BoardSpace, List<BoardSpace>> moves = player.getAvailableMoves(board);
@@ -50,6 +77,19 @@ public class Minimax implements AI {
         return bestMove;
     }
 
+    /**
+     * PART 2
+     * Implements the Minimax algorithm with Alpha-Beta pruning.
+     * Recursively evaluates board positions to find the best move.
+     * @param board The current game board state
+     * @param player The current player
+     * @param opponent The opposing player
+     * @param depth The remaining search depth
+     * @param alpha The alpha value for pruning
+     * @param beta The beta value for pruning
+     * @param isMaximizing Whether this is a maximizing player's turn
+     * @return The evaluation score for the current position
+     */
     private int minimax(BoardSpace[][] board, Player player, Player opponent,
                         int depth, int alpha, int beta, boolean isMaximizing) {
         if (depth == 0) {
@@ -106,6 +146,14 @@ public class Minimax implements AI {
         return bestScore;
     }
 
+    /**
+     * PART 3
+     * Evaluates the current board state using a weighted position strategy.
+     * Uses predefined weights from Constants.BOARD_WEIGHTS to value different positions.
+     * @param board The current game board state
+     * @param player The player whose position is being evaluated
+     * @return The evaluation score for the current position
+     */
     private int evaluateBoard(BoardSpace[][] board, Player player, Player opponent) {
         int score = 0;
 
@@ -122,6 +170,12 @@ public class Minimax implements AI {
         return score;
     }
 
+    /**
+     * PART 4
+     * Creates a deep copy of the game board.
+     * @param board The board to copy
+     * @return A new board with the same state as the input board
+     */
     private BoardSpace[][] copyBoard(BoardSpace[][] board) {
         BoardSpace[][] copy = new BoardSpace[board.length][board[0].length];
         for (int i = 0; i < board.length; i++) {
@@ -132,6 +186,15 @@ public class Minimax implements AI {
         return copy;
     }
 
+    /**
+     * PART 5
+     * Executes a move on the board and updates player ownership.
+     * @param board The game board to modify
+     * @param move The move to execute
+     * @param moves The list of pieces to flip
+     * @param player The player making the move
+     * @param opponent The opposing player
+     */
     private void executeMove(BoardSpace[][] board, BoardSpace move, List<BoardSpace> moves,
                      Player player, Player opponent) {
         board[move.getX()][move.getY()] = BoardSpace.getBoardSpace(
@@ -142,6 +205,16 @@ public class Minimax implements AI {
         }
     }
 
+    /**
+     * PART 6
+     * Flips all pieces between two positions on the board.
+     * Updates player ownership of the flipped pieces.
+     * @param start The starting position
+     * @param end The ending position
+     * @param board The game board to modify
+     * @param player The player gaining ownership
+     * @param opponent The player losing ownership
+     */
     private void flipPiecesBetween(BoardSpace start, BoardSpace end, BoardSpace[][] board,
                                    Player player, Player opponent) {
         int x1 = start.getX();

@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Represents a node in the Monte Carlo Tree Search.
+ * Each node stores the game state, player information, and statistics
+ * for the MCTS algorithm.
+ */
 public class MCTSNode {
     private BoardSpace[][] board;
     private Player currentPlayer;
@@ -16,6 +21,14 @@ public class MCTSNode {
     private int wins;
     private static final Random random = new Random();
 
+    /**
+     * Creates a new MCTS node with the specified game state and player information.
+     * @param board The current game board state
+     * @param currentPlayer The player whose turn it is
+     * @param opponent The opposing player
+     * @param move The move that led to this node
+     * @param parent The parent node in the search tree
+     */
     public MCTSNode(BoardSpace[][] board, Player currentPlayer, Player opponent,
                     BoardSpace move, MCTSNode parent) {
         this.board = board;
@@ -28,6 +41,30 @@ public class MCTSNode {
         this.wins = 0;
     }
 
+    /**
+     * PART 1
+     * Expands the current node by creating child nodes for all possible moves.
+     * Each child node represents a possible next game state.
+     */
+    public void expand() {
+        Map<BoardSpace, List<BoardSpace>> moves = currentPlayer.getAvailableMoves(board);
+        for (Map.Entry<BoardSpace, List<BoardSpace>> entry : moves.entrySet()) {
+            BoardSpace[][] newBoard = copyBoard(board);
+            Player current = currentPlayer.copy();
+            Player opponent = getOpponent().copy();
+            executeMove(newBoard, entry.getKey(), entry.getValue(), current, opponent);
+            MCTSNode child = new MCTSNode(newBoard, opponent, current,
+                                         entry.getKey(), this);
+            children.add(child);
+        }
+    }
+
+    /**
+     * PART 2
+     * Selects the best child node using the UCT formula.
+     * Balances exploration and exploitation in the search tree.
+     * @return The selected child node
+     */
     public MCTSNode selectChild(double explorationParam) {
         MCTSNode selected = null;
         double bestValue = Double.NEGATIVE_INFINITY;
@@ -61,21 +98,11 @@ public class MCTSNode {
         return selected;    // null if no child
     }
 
-    public void expand() {
-        Map<BoardSpace, List<BoardSpace>> moves = currentPlayer.getAvailableMoves(board);
-        for (Map.Entry<BoardSpace, List<BoardSpace>> entry : moves.entrySet()) {
-            BoardSpace[][] newBoard = copyBoard(board);
-            Player current = currentPlayer.copy();
-            Player opponent = getOpponent().copy();
-            executeMove(newBoard, entry.getKey(), entry.getValue(), current, opponent);
-            MCTSNode child = new MCTSNode(newBoard, opponent, current,
-                                         entry.getKey(), this);
-            children.add(child);
-        }
-    }
-
-    // simulates the terminal state of chosen child using random moves,
-    // returns whether current child results in a win
+    /**
+     * PART 3
+     * Simulates a random game from the current node until the end.
+     * @return The result of the simulation (1 for win, 0 for loss)
+     */
     public boolean simulate() {
         BoardSpace[][] simBoard = copyBoard(board);
         Player simCurrentPlayer = currentPlayer.copy();
@@ -124,6 +151,12 @@ public class MCTSNode {
         return currentPlayerCount > opponentCount;
     }
 
+    /**
+     * PART 4
+     * Updates the node's statistics after a simulation.
+     * Propagates the result up the tree.
+     * @param won The result of the simulation (1 for win, 0 for loss)
+     */
     public void backPropagate(boolean won) {
         MCTSNode node = this;
         while (node != null) {
@@ -201,34 +234,66 @@ public class MCTSNode {
         }
     }
 
+    /**
+     * Gets the list of child nodes.
+     * @return The children of this node
+     */
     public List<MCTSNode> getChildren() {
         return children;
     }
 
+    /**
+     * Gets the number of times this node has been visited.
+     * @return The visit count
+     */
     public int getVisits() {
         return visits;
     }
 
+    /**
+     * Gets the number of wins recorded for this node.
+     * @return The win count
+     */
     public int getWins() {
         return wins;
     }
 
+    /**
+     * Gets the current player.
+     * @return The player whose turn it is
+     */
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
 
+    /**
+     * Gets the opposing player.
+     * @return The opponent player
+     */
     public Player getOpponent() {
         return opponent;
     }
 
+    /**
+     * Gets the move that led to this node.
+     * @return The move that created this node
+     */
     public BoardSpace getMove() {
         return move;
     }
 
+    /**
+     * Gets the current game board state.
+     * @return The board state at this node
+     */
     public BoardSpace[][] getBoard() {
         return board;
     }
 
+    /**
+     * Gets the parent node.
+     * @return The parent of this node
+     */
     public MCTSNode getParent() {
         return parent;
     }
