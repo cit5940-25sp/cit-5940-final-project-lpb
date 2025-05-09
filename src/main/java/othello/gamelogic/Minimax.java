@@ -110,6 +110,7 @@ public class Minimax implements AI {
         }
 
         int bestScore;
+        // current player
         if (isMaximizing) {
             bestScore = Integer.MIN_VALUE;
             for (Map.Entry<BoardSpace, List<BoardSpace>> entry : moves.entrySet()) {
@@ -127,6 +128,7 @@ public class Minimax implements AI {
                 }
             }
         } else {
+            // opponent
             bestScore = Integer.MAX_VALUE;
             for (Map.Entry<BoardSpace, List<BoardSpace>> entry : moves.entrySet()) {
                 BoardSpace[][] copy = copyBoard(board);
