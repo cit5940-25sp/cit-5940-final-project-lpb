@@ -10,29 +10,16 @@ public class ComputerPlayer extends Player{
 
     public ComputerPlayer(String strategyName) {
         this.strategyName = strategyName;
-        this.strategy = createStrategy(strategyName);
+        this.strategy = switch (strategyName.toLowerCase()) {
+            case "minimax" -> new Minimax();
+            case "mcts" -> new MCTS();
+            case "custom" -> new Custom();
+            default -> throw new IllegalArgumentException("Unknown strategy: " + strategyName);
+        };
     }
 
     public String getStrategyName() {
         return strategyName;
-    }
-
-    /**
-     * Creates a specific strategy instance based on the strategy name
-     * @param strategyName name of the strategy from program arguments
-     * @return the created strategy instance
-     */
-    private AI createStrategy(String strategyName) {
-        switch (strategyName.toLowerCase()) {
-            case "minimax":
-                return new Minimax();
-            case "mcts":
-                return new MCTS();
-            case "custom":
-                return new Custom();
-            default:
-                throw new IllegalArgumentException("Unknown strategy: " + strategyName);
-        }
     }
 
     /**

@@ -236,6 +236,7 @@ public abstract class Player {
             copy = new HumanPlayer(this.color);
         } else if (this instanceof ComputerPlayer) {
             copy = new ComputerPlayer(((ComputerPlayer) this).getStrategyName());
+            copy.setColor(this.color);
         } else {
             throw new IllegalStateException("Unknown player type");
         }

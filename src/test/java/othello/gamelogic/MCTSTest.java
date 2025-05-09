@@ -55,8 +55,11 @@ public class MCTSTest {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 board[i][j] = BoardSpace.getBoardSpace(i, j, BoardSpace.SpaceType.WHITE);
+                whitePlayer.addOwnedSpace(board[i][j]);
             }
         }
+        blackPlayer.removeOwnedSpace(board[3][4]);
+        blackPlayer.removeOwnedSpace(board[4][3]);
         
         BoardSpace move = mcts.nextMove(board, blackPlayer, whitePlayer);
         assertNull(move);
