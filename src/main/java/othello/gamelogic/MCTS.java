@@ -1,27 +1,70 @@
 package othello.gamelogic;
 
+import othello.Constants;
+import java.util.List;
+import java.util.Map;
+
 public class MCTS implements AI {
+    private int iterations;
+    private static final double EXPLORATION_PARAM = Constants.EXPLORATION_PARAM;
+
+    public MCTS() {
+        this.iterations = 1000; // default iterations
+    }
+
+    public void setIterations(int iterations) {
+        if (iterations < 1) {
+            throw new IllegalArgumentException("Iterations must be greater than 0");
+        }
+        this.iterations = iterations;
+    }
+
+    public int getIterations() {
+        return iterations;
+    }
+
     @Override
-    public BoardSpace nextMove(BoardSpace[][] boardSpace, Player player) {
-        // reinforcement learning, random sampling from population
-        // auto prunes a state value
-        // STEPS:
-        // 1. Tree Traversal - UCB1(S_i) = average of S_i (score / n_i) + 2 *
-        //                     sqrt(ln N (parent visits) / n_i (# of visits of the node))
-        //    current = S_0
-        //    current.isLeaf() ? (n_i = 0 (i.e. current never sampled before) ? Rollout :
-        //                      for each available action from here, add a new state in tree,
-        //                      current = first new child node, Rollout) :
-        //                      current = child w. max UCB1(S_i)
-        // 2. Node Expansion
-        // 3. Rollout (Random Simulation)
-        //    If S_i is terminal state (end of game): return value(S_i)
-        //    Else: A_i = random(available actions(S_i))
-        //          S_i = Simulate(A_i, S_i)
-        //          until reaching terminal state
-        // 4. Backpropagation
-        //    Recursively go back until the root and update the score (sum of score of 2 children)
-        //    and increment n_i of each node
-        return null;
+    public BoardSpace nextMove(BoardSpace[][] board, Player player, Player opponent) {
+        Map<BoardSpace, List<BoardSpace>> moves = player.getAvailableMoves(board);
+        if (moves.isEmpty()) {
+            return null;
+        }
+
+        // create root node (copy board before passing it in)
+        BoardSpace[][] copy = new BoardSpace[board.length][board[0].length];
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                copy[i][j] = BoardSpace.getBoardSpace(i, j, board[i][j].getType());
+            }
+        }
+        MCTSNode root = new MCTSNode(copy, player.copy(), opponent.copy(), null, null);
+        root.expand();
+
+        // MCTS iterations
+        for (int i = 0; i < iterations; i++) {
+            // 1. Selection
+            MCTSNode selectedNode = root;
+            while (!selectedNode.getChildren().isEmpty() && selectedNode.getVisits() > 0) {
+                selectedNode = selectedNode.selectChild(EXPLORATION_PARAM);
+            }
+
+            // 2. Expansion
+            // if no child, try to expand again
+            if (selectedNode.getVisits() > 0) {
+                selectedNode.expand();
+                if (!selectedNode.getChildren().isEmpty()) {
+                    selectedNode = selectedNode.selectChild(EXPLORATION_PARAM);
+                }
+            }
+
+            // 3. Simulation
+            boolean won = selectedNode.simulate();
+
+            // 4. Backpropagation
+            selectedNode.backPropagate(won);
+        }
+
+        // return best move
+        return root.getBestMove();
     }
 }

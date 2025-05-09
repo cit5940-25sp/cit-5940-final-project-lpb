@@ -34,12 +34,7 @@ public class BoardSpace {
      */
     public static BoardSpace getBoardSpace(int x, int y, SpaceType type) {
         String key = x + "," + y + "," + type.name(); // Unique key for each combination
-        BoardSpace space = boardSpaceCache.get(key);
-        if (space == null) {
-            space = new BoardSpace(x, y, type);
-            boardSpaceCache.put(key, space);
-        }
-        return space;
+        return boardSpaceCache.computeIfAbsent(key, k -> new BoardSpace(x, y, type));
     }
 
     // Copy constructor (optional, if needed)
@@ -108,12 +103,12 @@ public class BoardSpace {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BoardSpace that = (BoardSpace) o;
-        return x == that.x && y == that.y;
+        return x == that.x && y == that.y && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(x, y, type);
     }
 
 }

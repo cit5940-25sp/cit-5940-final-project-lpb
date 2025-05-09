@@ -14,11 +14,12 @@ public abstract class Player {
     // Use final for the list to prevent reassignment, though its contents are mutable
     private final List<BoardSpace> playerOwnedSpaces = new ArrayList<>();
 
+    private BoardSpace.SpaceType color;
+
     public List<BoardSpace> getPlayerOwnedSpacesSpaces() {
         return playerOwnedSpaces;
     }
 
-    private BoardSpace.SpaceType color;
     public void setColor(BoardSpace.SpaceType color) {
         this.color = color;
     }
@@ -225,18 +226,25 @@ public abstract class Player {
         }
     }
 
-    // Override equals and hashCode if Player objects are stored in sets/maps based on color?
-    // Currently not needed based on usage.
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Player player = (Player) o;
-        return color == player.color; // Players are equal if their color is the same
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(color);
+    /**
+     * Creates a deep copy of this Player object.
+     * @return A new Player object with the same color and owned spaces.
+     */
+    public Player copy() {
+        Player copy;
+        if (this instanceof HumanPlayer) {
+            copy = new HumanPlayer(this.color);
+        } else if (this instanceof ComputerPlayer) {
+            copy = new ComputerPlayer(((ComputerPlayer) this).getStrategyName());
+        } else {
+            throw new IllegalStateException("Unknown player type");
+        }
+        
+        // Copy owned spaces
+        for (BoardSpace space : this.playerOwnedSpaces) {
+            copy.addOwnedSpace(BoardSpace.getBoardSpace(space.getX(), space.getY(), space.getType()));
+        }
+        
+        return copy;
     }
 }

@@ -117,7 +117,6 @@ public class OthelloGame {
 
     /**
      * PART 1
-     * TODO: Implement this method
      * Claims spaces from all origins that lead to a specified destination.
      * This is called when a player, human or computer, selects a valid destination.
      * @param actingPlayer the player that will claim spaces
@@ -132,9 +131,7 @@ public class OthelloGame {
         if (selectedDestination != null) {
             int destX = selectedDestination.getX();
             int destY = selectedDestination.getY();
-            BoardSpace.SpaceType currentTypeOnBoard = BoardSpace.SpaceType.EMPTY; // Default assumption
             if (destX >= 0 && destX < GAME_BOARD_SIZE && destY >= 0 && destY < GAME_BOARD_SIZE && board[destX][destY] != null) {
-                currentTypeOnBoard = board[destX][destY].getType();
             } else {
                 System.err.println("!!! takeSpaces: Invalid coordinates or null board space for selectedDestination (" + destX + "," + destY + ")");
             }
@@ -183,16 +180,14 @@ public class OthelloGame {
         while (x != x2 || y != y2) {
             BoardSpace current = board[x][y];
 
-            BoardSpace currentOriginal = board[x][y];
-
-            if (currentOriginal.getType() == opponent.getColor()) {
+            if (current.getType() == opponent.getColor()) {
                 // Get the flyweight instance for the new state
                 BoardSpace currentNew = BoardSpace.getBoardSpace(x, y, actingPlayer.getColor());
                 // Update the board reference
                 board[x][y] = currentNew;
 
                 // Update ownership lists
-                opponent.removeOwnedSpace(currentOriginal);
+                opponent.removeOwnedSpace(current);
                 actingPlayer.addOwnedSpace(currentNew);
             } else {
                 System.err.println("Warning: Unexpected piece type at (" + x + "," + y + ") in flipPiecesBetween.");
@@ -206,7 +201,6 @@ public class OthelloGame {
 
     /**
      * PART 2
-     * TODO: Implement this method
      * Gets the computer decision for its turn.
      * Should call a method within the ComputerPlayer class that returns a BoardSpace using a specific strategy.
      * @param computer computer player that is deciding their move for their turn
@@ -214,7 +208,7 @@ public class OthelloGame {
      */
     public BoardSpace computerDecision(ComputerPlayer computer) {
 
-        return computer.makeMove(board);
+        return computer.makeMove(board, playerOne == computer ? playerTwo : playerOne);
     }
 
 }
