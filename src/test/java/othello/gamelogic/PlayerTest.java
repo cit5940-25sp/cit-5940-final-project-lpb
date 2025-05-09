@@ -8,6 +8,14 @@ import java.util.List;
 import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the {@link Player} class using JUnit 5.
+ * <p>
+ * This test class verifies the correctness of methods in the {@code Player} class,
+ * including ownership management of board spaces and calculation of available moves
+ * under various board configurations in an Othello game.
+ * </p>
+ */
 public class PlayerTest {
 
     private Player testPlayerBlack;

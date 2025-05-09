@@ -13,6 +13,14 @@ public class OthelloGame {
     private final Player playerOne;
     private final Player playerTwo;
 
+    /**
+     * Constructs a new OthelloGame with two players and sets up the initial board state.
+     * Initializes the four central pieces according to Othello rules and assigns
+     * ownership to each player.
+     *
+     * @param playerOne the first player (usually black)
+     * @param playerTwo the second player (usually white)
+     */
     public OthelloGame(Player playerOne, Player playerTwo) {
         this.playerOne = playerOne;
         this.playerTwo = playerTwo;
@@ -30,16 +38,31 @@ public class OthelloGame {
         playerTwo.addOwnedSpace(board[4][4]);
     }
 
+    /**
+     * Returns the current game board as a 2D array of BoardSpace.
+     *
+     * @return the game board
+     */
     public BoardSpace[][] getBoard() {
 
         return board;
     }
 
+    /**
+     * Returns the first player.
+     *
+     * @return player one
+     */
     public Player getPlayerOne() {
 
         return playerOne;
     }
 
+    /**
+     * Returns the second player.
+     *
+     * @return player two
+     */
     public Player getPlayerTwo() {
 
         return  playerTwo;

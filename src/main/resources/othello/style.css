@@ -1,4 +1,8 @@
-/* Dynamic timer styles */
+/* ============================= */
+/* Timer Styles                  */
+/* ============================= */
+
+/* General timer appearance with digital font and green color */
 .dynamic-timer {
     -fx-font-family: 'Digital', monospace;
     -fx-font-size: 24px;
@@ -6,12 +10,17 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0.5, 0, 1);
 }
 
+/* Urgent state: red text and a stronger shadow for emphasis */
 .dynamic-timer.urgent {
     -fx-text-fill: #FF5252;
     -fx-effect: dropshadow(gaussian, rgba(255,0,0,0.3), 3, 0.7, 0, 1);
 }
 
-/* Status card styles */
+/* ============================= */
+/* Card and Status Display Styles */
+/* ============================= */
+
+/* Background and text styles for general status cards */
 .status-card {
     -fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);
     -fx-background-radius: 10;
@@ -40,29 +49,29 @@
 /* Control panel background */
 .control-panel {
     -fx-background-color: linear-gradient(to bottom, #2c3e50, #4ca1af);
-    -fx-padding: 25px; /* 增加内边距 */
-    -fx-min-width: 350px; /* 最小宽度保障 */
-    -fx-pref-width: 350px; /* 首选宽度 */
+    -fx-padding: 25px;
+    -fx-min-width: 350px;
+    -fx-pref-width: 350px;
     -fx-border-color: rgba(255,255,255,0.2);
     -fx-border-width: 0 0 0 2px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
 }
 
-
+/* === Game Board Container === */
 .board-container {
     -fx-background-color: white;
-    -fx-alignment: center; /* 关键居中属性 */
+    -fx-alignment: center;
     -fx-padding: 20;
-    -fx-pref-width: 480px; /* 固定宽度 */
+    -fx-pref-width: 480px;
 }
 
+/* === Game Board Surface === */
 .game-board {
     -fx-background-color: transparent;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);
 }
 
-
-
+/* === Section Titles (e.g., 'Score', 'Timer') === */
 .section-title {
     -fx-text-fill: rgba(255,255,255,0.8);
     -fx-font-size: 16px;
@@ -70,7 +79,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 2, 0, 0, 1);
 }
 
-
+/* === Status Card (general info block) === */
 .status-card {
     -fx-background-color: rgba(0,0,0,0.25);
     -fx-background-radius: 15;
@@ -81,30 +90,35 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 0);
 }
 
+/* === Turn Indicator (likely a circle or border) === */
 .turn-indicator {
     -fx-stroke: white;
     -fx-stroke-width: 2px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 5, 0.5, 0, 0);
-    -fx-margin-bottom: 10px; /* 增加与下方元素的间距 */
+    -fx-margin-bottom: 10px;
 }
 
+/* === Status Text (e.g., "Black's Turn") === */
 .status-text {
     -fx-font-size: 20px;
-    -fx-font-weight: bold; /* 显式加粗 */
-    -fx-text-fill: white;  /* 深色提升可读性 */
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 2, 0.5, 0, 1);
 }
+
+/* === Score Display (in multiple places, see duplicate note) === */
 .score-display {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
     -fx-text-fill: #000000;
 }
 
+/* === Timer Section Padding === */
 .timer-section {
     -fx-padding: 10px 0;
 }
 
-
+/* === Timer Container Styling === */
 .timer-container {
     -fx-background-color: rgba(0, 0, 0, 0.3);
     -fx-background-radius: 15;
@@ -114,11 +128,13 @@
     -fx-border-width: 1px;
 }
 
+/* === Timer Icon Style (clock icon, etc.) === */
 .timer-icon {
     -fx-font-size: 28px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 3, 0.5, 0, 1);
 }
 
+/* === Countdown Timer Text === */
 .timer-countdown {
     -fx-font-size: 42px;
     -fx-text-fill: #4CAF50;
@@ -126,37 +142,40 @@
     -fx-padding: 0 0 5 0;
 }
 
+/* === Countdown Timer When Urgent === */
 .timer-countdown.urgent {
     -fx-text-fill: #FF5252;
     -fx-effect: innershadow(gaussian, rgba(255,0,0,0.8), 5, 0.5, 0, 0);
 }
 
-
+/* === Score Panel Background and Padding === */
 .score-panel {
     -fx-padding: 15px;
     -fx-background-color: rgba(0,0,0,0.2);
     -fx-background-radius: 10;
 }
 
+/* === Score Section Titles (e.g., "Your Score") === */
 .score-title {
     -fx-text-fill: rgba(255,255,255,0.8);
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
 
+/* === Score Display - Repeated (final effective style) === */
 .score-display {
-    -fx-font-size: 20px; /* 原为24px */
+    -fx-font-size: 20px;
     -fx-text-fill: white;
     -fx-font-weight: bold;
 }
 
-
+/* === Action Button Base Style === */
 .action-button {
     -fx-pref-width: 220px;
     -fx-alignment: CENTER;
 }
 
-
+/* === Action Button Full Style === */
 .action-button {
     -fx-background-color: #3498db;
     -fx-text-fill: white;
@@ -169,24 +188,33 @@
     -fx-max-width: Infinity;
 }
 
+/* === Hover Effect for Action Buttons === */
 .action-button:hover {
     -fx-background-color: #2980b9;
     -fx-cursor: hand;
 }
 
+/* === Layout Section Containers === */
 .indicator-container {
     -fx-padding: 0 0 10 0;
 }
 
+/* === Status Section Container === */
 .status-section {
     -fx-padding: 0 0 10px 0;
 }
+
+/* === Timer Section Container === */
 .timer-section {
     -fx-padding: 10px 0;
 }
+
+/* === Score Section Container === */
 .score-section {
     -fx-padding: 10px 0;
 }
+
+/* === Start Button Specific Style === */
 .start-button {
     -fx-background-color: #4CAF50;
     -fx-text-fill: white;
@@ -194,6 +222,8 @@
     -fx-padding: 10 20;
     -fx-background-radius: 5;
 }
+
+/* === Start Button Hover Effect === */
 .start-button:hover {
     -fx-background-color: #45a049;
 }

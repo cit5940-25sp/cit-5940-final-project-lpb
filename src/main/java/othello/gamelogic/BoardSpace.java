@@ -19,6 +19,13 @@ public class BoardSpace {
     // Flyweight factory: stores shared instances of BoardSpace
     private static final Map<String, BoardSpace> boardSpaceCache = new HashMap<>();
 
+    /**
+     * Constructs a BoardSpace with specified coordinates and type.
+
+     * @param x    The x-coordinate of the space on the board.
+     * @param y    The y-coordinate of the space on the board.
+     * @param type The initial type of the space.
+     */
     public BoardSpace(int x, int y, SpaceType type) {
         this.x = x;
         this.y = y;
@@ -37,7 +44,11 @@ public class BoardSpace {
         return boardSpaceCache.computeIfAbsent(key, k -> new BoardSpace(x, y, type));
     }
 
-    // Copy constructor (optional, if needed)
+    /**
+     * Constructs a new BoardSpace that is a deep copy of the specified BoardSpace.
+     *
+     * @param other The BoardSpace to copy.
+     */
     public BoardSpace(BoardSpace other) {
         this.x = other.x;
         this.y = other.y;
@@ -98,6 +109,13 @@ public class BoardSpace {
         }
     }
 
+    /**
+     * Compares this BoardSpace to another object for equality. Two BoardSpaces
+     * are considered equal if they have identical coordinates and space types.
+     *
+     * @param o The object to compare with.
+     * @return true if the objects are logically equivalent.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -106,6 +124,11 @@ public class BoardSpace {
         return x == that.x && y == that.y && type == that.type;
     }
 
+    /**
+     * Generates a hash code based on the space's coordinates and type.
+     *
+     * @return A hash code consistent with the equals() implementation.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(x, y, type);

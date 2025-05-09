@@ -1,5 +1,10 @@
 package othello.gamelogic;
 
+/**
+ * Unit tests for the {@link BoardSpace} class.
+ * These tests verify correct behavior of the flyweight pattern,
+ * property getters/setters, copy constructor, enum behavior, and equality/hashCode methods.
+ */
 import javafx.scene.paint.Color;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,4 +78,24 @@ public class BoardSpaceTest {
         assertEquals(Color.BLACK, BoardSpace.SpaceType.BLACK.fill(), "BLACK fill color should be BLACK.");
         assertEquals(Color.WHITE, BoardSpace.SpaceType.WHITE.fill(), "WHITE fill color should be WHITE.");
     }
+
+    @Test
+    void testHashCodeConsistency() {
+        BoardSpace space1 = new BoardSpace(6, 6, BoardSpace.SpaceType.WHITE);
+        BoardSpace space2 = new BoardSpace(6, 6, BoardSpace.SpaceType.WHITE);
+
+        assertEquals(space1.hashCode(), space2.hashCode(), "Equal objects must have same hashCode.");
+    }
+
+    @Test
+    void testEqualsMethod() {
+        BoardSpace space1 = new BoardSpace(1, 2, BoardSpace.SpaceType.BLACK);
+        BoardSpace space2 = new BoardSpace(1, 2, BoardSpace.SpaceType.BLACK);
+
+        assertEquals(space1, space2, "Spaces with same x, y, and type should be equal.");
+        assertNotEquals(space1, null, "BoardSpace should not be equal to null.");
+        assertNotEquals(space1, "not a BoardSpace", "BoardSpace should not be equal to another type.");
+    }
+
+
 }
