@@ -70,7 +70,6 @@ public class OthelloGame {
 
     /**
      * PART 1
-     * TODO: Implement this method
      * Claims the specified space for the acting player.
      * Should also check if the space being taken is already owned by the acting player,
      * should not claim anything if acting player already owns space at (x,y)
