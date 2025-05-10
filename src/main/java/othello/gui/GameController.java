@@ -16,7 +16,6 @@ import othello.gamelogic.ComputerPlayer;
 import othello.gamelogic.HumanPlayer;
 import othello.gamelogic.OthelloGame;
 import othello.gamelogic.Player;
-import othello.gui.GUISpace;
 
 import java.util.List;
 import java.util.Map;
@@ -173,7 +172,6 @@ public class GameController {
         stopTurnTimer();
         og.takeSpaces(player, otherPlayer(), moves, dest);
         displayBoard();
-        initSpaces();
         takeTurn(otherPlayer());
     }
 

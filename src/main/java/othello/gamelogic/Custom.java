@@ -2,6 +2,7 @@ package othello.gamelogic;
 
 import othello.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
  * Implements a weighted board evaluation strategy based on position values.
  */
 public class Custom implements AI {
-    private int depth = 3;
+    private int depth = 5;
 
     /**
      * Sets the search depth for the Negamax algorithm.
@@ -39,7 +40,7 @@ public class Custom implements AI {
         Map<BoardSpace, List<BoardSpace>> moves = player.getAvailableMoves(board);
         if (moves.isEmpty()) return null;
 
-        BoardSpace bestMove = null;
+        List<BoardSpace> bestMove = new ArrayList<>();
         int bestScore = Integer.MIN_VALUE;
 
         for (Map.Entry<BoardSpace, List<BoardSpace>> move : moves.entrySet()) {
@@ -51,11 +52,14 @@ public class Custom implements AI {
             int score = -negamax(newBoard, opp, current, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, -1);
             if (score > bestScore) {
                 bestScore = score;
-                bestMove = move.getKey();
+                bestMove.clear();
+                bestMove.add(move.getKey());
+            } else if (score == bestScore) {
+                bestMove.add(move.getKey());
             }
         }
 
-        return bestMove;
+        return bestMove.get(new java.util.Random().nextInt(bestMove.size()));
     }
 
     /**

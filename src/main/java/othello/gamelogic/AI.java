@@ -1,9 +1,5 @@
 package othello.gamelogic;
 
-import java.util.List;
-
-import static othello.Constants.BOARD_WEIGHTS;
-
 /**
  * Interface for AI strategies in the Othello game.
  * Defines the contract for different AI implementations to determine
