@@ -29,6 +29,7 @@ class OthelloGameTest {
         whitePlayer.setColor(BoardSpace.SpaceType.WHITE);
         game = new OthelloGame(blackPlayer, whitePlayer);
     }
+
     @Test
     void getBoard() {
         BoardSpace[][] board = game.getBoard();
@@ -61,11 +62,17 @@ class OthelloGameTest {
 
     @Test
     void initBoard() {
-        game.initBoard();
         BoardSpace[][] board = game.getBoard();
+
         for (int i = 0; i < OthelloGame.GAME_BOARD_SIZE; i++) {
             for (int j = 0; j < OthelloGame.GAME_BOARD_SIZE; j++) {
-                assertEquals(BoardSpace.SpaceType.EMPTY, board[i][j].getType());
+                if ((i == 3 && j == 3) || (i == 4 && j == 4)) {
+                    assertEquals(BoardSpace.SpaceType.WHITE, board[i][j].getType());
+                } else if ((i == 3 && j == 4) || (i == 4 && j == 3)) {
+                    assertEquals(BoardSpace.SpaceType.BLACK, board[i][j].getType());
+                } else {
+                    assertEquals(BoardSpace.SpaceType.EMPTY, board[i][j].getType());
+                }
             }
         }
     }
