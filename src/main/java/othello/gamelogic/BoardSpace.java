@@ -121,7 +121,7 @@ public class BoardSpace {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BoardSpace that = (BoardSpace) o;
-        return x == that.x && y == that.y && type == that.type;
+        return x == that.x && y == that.y;
     }
 
     /**
@@ -131,7 +131,7 @@ public class BoardSpace {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, type);
+        return Objects.hash(x, y);
     }
 
 }

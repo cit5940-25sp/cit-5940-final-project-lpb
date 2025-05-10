@@ -16,6 +16,8 @@ import othello.gamelogic.ComputerPlayer;
 import othello.gamelogic.HumanPlayer;
 import othello.gamelogic.OthelloGame;
 import othello.gamelogic.Player;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 import java.util.List;
 import java.util.Map;
@@ -146,8 +148,12 @@ public class GameController {
             computerTurnBtn.setVisible(false);
             showMoves((HumanPlayer) player);
         } else {
-            computerTurnBtn.setVisible(true);
-            computerTurnBtn.setOnAction(e -> computerDecision((ComputerPlayer) player));
+            computerTurnBtn.setVisible(false);
+            PauseTransition delay = new PauseTransition(Duration.seconds(0.5));
+            delay.setOnFinished(event -> {
+                computerDecision((ComputerPlayer) player);
+            });
+            delay.play();
         }
     }
 
@@ -259,7 +265,8 @@ public class GameController {
         int p1 = og.getPlayerOne().getPlayerOwnedSpacesSpaces().size();
         int p2 = og.getPlayerTwo().getPlayerOwnedSpacesSpaces().size();
         String result = p1 == p2 ? "Tie!" : (p1 > p2 ? "Black wins!" : "White wins!");
-        turnLabel.setText("GAME OVER: " + result + " (" + p1 + "-" + p2 + ")");
+        turnLabel.setText("GAME OVER: " + result + "\n (Black: " + p1 + " - White: " + p2 + ")");
+        timerLabel.setVisible(false);
         stopTurnTimer();
     }
 
