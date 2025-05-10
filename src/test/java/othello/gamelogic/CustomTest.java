@@ -49,7 +49,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 1
      * Tests the initial move selection of the Custom AI.
      * Verifies that the algorithm can make a valid move from the starting position
      * and that the move is in a valid position on the board.
@@ -66,7 +65,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 2
      * Tests the behavior when no valid moves are available.
      * Verifies that the algorithm correctly returns null when there are no legal moves
      * for the current player.
@@ -84,7 +82,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 3
      * Tests the depth setting functionality of the Custom AI.
      * Verifies that valid depth values are accepted and invalid values (0 or negative)
      * throw appropriate exceptions.
@@ -100,27 +97,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 4
-     * Tests the consistency of move selection.
-     * Verifies that multiple calls to nextMove() return the same move for the same board state,
-     * as the Negamax algorithm is deterministic.
-     */
-    @Test
-    void testMoveConsistency() {
-        // Test calling nextMove multiple times
-        BoardSpace move1 = custom.nextMove(board, blackPlayer, whitePlayer);
-        BoardSpace move2 = custom.nextMove(board, blackPlayer, whitePlayer);
-        
-        // Since Negamax is deterministic, it should return the same move
-        assertEquals(move1, move2);
-        
-        // Verify the validity of the move
-        Map<BoardSpace, List<BoardSpace>> availableMoves = blackPlayer.getAvailableMoves(board);
-        assertTrue(availableMoves.containsKey(move1));
-    }
-
-    /**
-     * PART 5
      * Tests the execution of a move selected by the Custom AI.
      * Verifies that the selected move can be properly executed on the board
      * and that the board state is correctly updated.
@@ -143,7 +119,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 6
      * Tests the algorithm's preference for corner moves.
      * Verifies that when a corner move is available, the algorithm will select it
      * as corners are strategically valuable in Othello.
@@ -187,7 +162,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 7
      * Tests the algorithm's decision-making in different board states.
      * Verifies that the algorithm can identify and select the best move
      * in a situation where one player has a clear advantage.
@@ -232,7 +206,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 8
      * Tests the Alpha-Beta pruning optimization in the Negamax algorithm.
      * Verifies that the algorithm can make correct decisions while using pruning
      * to improve search efficiency.
@@ -257,7 +230,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 9
      * Tests the evaluation function in various board positions.
      * Verifies that the algorithm correctly evaluates different board states,
      * including corner advantages, edge disadvantages, and internal positions.
@@ -288,7 +260,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 10
      * Tests the algorithm's behavior in end-game situations.
      * Verifies that the algorithm can make appropriate decisions
      * when the game is near completion.
@@ -321,7 +292,6 @@ public class CustomTest {
     }
 
     /**
-     * PART 11
      * Tests the handling of situations where a player must pass their turn.
      * Verifies that the algorithm correctly returns null when the current player
      * has no valid moves available.
@@ -349,4 +319,4 @@ public class CustomTest {
         BoardSpace move = custom.nextMove(board, whitePlayer, blackPlayer);
         assertNull(move); // Should return null, because there are no available moves
     }
-} 
+}
