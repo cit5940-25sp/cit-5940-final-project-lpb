@@ -31,24 +31,24 @@ class OthelloGameTest {
     }
 
     @Test
-    void getBoard() {
+    void testGetBoard() {
         BoardSpace[][] board = game.getBoard();
         assertEquals(BoardSpace.SpaceType.WHITE, board[3][3].getType());
         assertEquals(BoardSpace.SpaceType.BLACK, board[3][4].getType());
     }
 
     @Test
-    void getPlayerOne() {
+    void testGetPlayerOne() {
         assertSame(blackPlayer, game.getPlayerOne());
     }
 
     @Test
-    void getPlayerTwo() {
+    void testGetPlayerTwo() {
         assertSame(whitePlayer, game.getPlayerTwo());
     }
 
     @Test
-    void getAvailableMoves() {
+    void testGetAvailableMoves() {
         Map<BoardSpace, List<BoardSpace>> moves = game.getAvailableMoves(blackPlayer);
 
         assertEquals(4, moves.size());
@@ -78,14 +78,14 @@ class OthelloGameTest {
     }
 
     @Test
-    void takeSpace() {
+    void testTakeSpace() {
         game.takeSpace(blackPlayer, whitePlayer, 0, 0);
         BoardSpace space = game.getBoard()[0][0];
         assertEquals(BoardSpace.SpaceType.BLACK, space.getType());
     }
 
     @Test
-    void takeSpaces() {
+    void testTakeSpaces() {
         Map<BoardSpace, List<BoardSpace>> moves = new HashMap<>();
         BoardSpace dest = BoardSpace.getBoardSpace(3, 2, BoardSpace.SpaceType.EMPTY);
         List<BoardSpace> origins = List.of(BoardSpace.getBoardSpace(3, 4, BoardSpace.SpaceType.BLACK));
@@ -98,7 +98,7 @@ class OthelloGameTest {
     }
 
     @Test
-    void computerDecision() {
+    void testComputerDecision() {
         ComputerPlayer computer = new ComputerPlayer("minimax") {
             {
                 setColor(BoardSpace.SpaceType.BLACK);

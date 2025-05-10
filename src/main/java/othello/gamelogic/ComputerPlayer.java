@@ -16,8 +16,8 @@ public class ComputerPlayer extends Player{
      * @throws IllegalArgumentException if the strategy name is not recognized
      */
     public ComputerPlayer(String strategyName) {
-        this.strategyName = strategyName;
-        this.strategy = switch (strategyName.toLowerCase()) {
+        this.strategyName = strategyName.toLowerCase();
+        this.strategy = switch (this.strategyName) {
             case "minimax" -> new Minimax();
             case "mcts" -> new MCTS();
             case "custom" -> new Custom();
@@ -40,9 +40,6 @@ public class ComputerPlayer extends Player{
      * @return the selected BoardSpace to move to
      */
     public BoardSpace makeMove(BoardSpace[][] board, Player opponent) {
-        if (strategy == null) {
-            throw new IllegalStateException("No strategy assigned to computer player");
-        }
         return strategy.nextMove(board, this, opponent);
     }
 }
