@@ -48,12 +48,6 @@ The GUI was significantly enhanced using CSS for styling (colors, fonts, spacing
 Testing was conducted throughout the development process, including mocking the game and comparing it with online Othello games.
 
 ---
-## 🔗 GitHub Repository
-
-Explore the source code and documentation for the Othello Game:
-
-[👉 View on GitHub](https://github.com/cit5940-25sp/cit-5940-final-project-lpb)
----
 
 ## 🎥 Demo Video
 
